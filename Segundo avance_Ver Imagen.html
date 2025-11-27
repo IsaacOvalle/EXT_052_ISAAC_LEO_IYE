@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BRAZUK - Ver Imagen</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+/* ===== RESET ===== */
+* { margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif; }
+body { background:#fff; overflow-x:hidden; }
+
+/* ===== HEADER ===== */
+header{
+  background:#f4c52b;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  height:60px;
+  border-bottom:2px solid #ccc;
+  position:sticky; top:0; z-index:3;
+}
+.logo { display:flex; align-items:center; font-weight:bold; font-size:22px; cursor:pointer; line-height:1; padding-top:2px; }
+.menu-icon{ font-size:22px; margin-right:10px; cursor:pointer; }
+.search-bar { display:flex; align-items:center; background:#dfffb2; border-radius:25px; padding:5px 15px; width:40%; }
+.search-bar input{ border:none; outline:none; background:transparent; width:100%; padding:5px; font-size:16px; }
+.search-bar button{ background:none; border:none; cursor:pointer; font-size:18px; }
+.profile-icon{ border:2px solid #000; border-radius:50%; padding:6px; cursor:pointer; }
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* espacio entre nombre y foto */
+  font-weight: 600;
+  font-size: 16px;
+  color: #000; /* color por defecto, cambiará con JS para modo oscuro */
+}
+
+.profile-icon{
+  border:2px solid #000;
+  border-radius:50%;
+  padding:6px;       
+  cursor:pointer;
+  width:50px;        
+  height:50px;       
+  background-size: cover;
+  background-position: center;
+}
+
+/* ===== MENÚS LATERALES ===== */
+.menu-lateral, .menu-derecha{
+  position:fixed; top:0; height:100vh; background:#f4c52b;
+  box-shadow:3px 0 14px rgba(0,0,0,0.15);
+  padding-top:80px; display:flex; flex-direction:column; align-items:center; gap:12px;
+  z-index:4; transition: transform 0.32s ease; min-width:180px;
+}
+.menu-lateral{ left:0; transform:translateX(-100%); }
+.menu-lateral.abierto{ transform:translateX(0); }
+.menu-derecha{ right:0; left:auto; transform:translateX(100%); }
+.menu-derecha.abierto{ transform:translateX(0); }
+.menu-lateral button, .menu-derecha button{
+  width:80%; background:#baf46a; border:none; border-radius:20px; padding:10px 12px; font-weight:600; cursor:pointer;
+}
+.menu-lateral button:hover, .menu-derecha button:hover{ background:#a4e45a; }
+
+/* ===== CONTENIDO PRINCIPAL ===== */
+#pageContent{ transition: transform 0.32s ease; will-change:transform; }
+main{ display:flex; justify-content:space-between; width:90%; margin:20px auto; gap:20px; }
+
+/* Imagen principal */
+.main-image{ flex:2.5; background:#baf46a; border-radius:20px; padding:15px; display:flex; flex-direction:column; align-items:center; }
+.main-image img{ width:100%; border-radius:15px; background:#baf46a; }
+.image-info{ margin-top:10px; padding:10px; width:100%; }
+.image-header{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+.image-header h2{ font-size:20px; color:#000; margin-bottom:5px; }
+.image-actions{ display:flex; align-items:center; gap:10px; }
+.image-actions button{ background:#dfffb2; border:none; border-radius:20px; padding:5px 12px; cursor:pointer; transition:0.2s; font-size:14px; }
+.image-actions button:hover{ background:#a4e45a; }
+.image-actions button.active{ background:#f4c52b; color:#000; border:2px solid #f4c52b; }
+.image-actions button.active i{ color:#000; }
+.image-info p{ font-size:14px; color:#333; margin-top:5px; }
+
+/* Comentarios */
+.comments{ flex:1; max-height:400px; overflow-y:auto; background:#baf46a; border-radius:12px; padding:10px; }
+.comments h3{ font-size:16px; margin-bottom:8px; }
+.comment{ background:#dfffb2; border-radius:8px; padding:8px; margin-bottom:8px; }
+
+/* Imágenes relacionadas */
+.related-images{ margin-top:5px; display:flex; align-items:center; gap:10px; }
+.related-images-container{ display:flex; overflow-x:auto; scroll-behavior:smooth; gap:10px; flex:1; }
+.related-images img{ width:150px; height:100px; border-radius:12px; cursor:pointer; transition:transform 0.2s; }
+.related-images img:hover{ transform:scale(1.05); }
+.scroll-btn{ background:#f4c52b; border:none; font-size:20px; cursor:pointer; padding:5px 10px; border-radius:50%; }
+
+.aviso-logo {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 0, 0.9);
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+  font-size: 14px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #000; 
+  font-weight: bold; 
+}
+
+.aviso-logo button.cerrar-aviso {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  color: #000; 
+}
+
+@media (max-width:900px){ main{ flex-direction:column; } .related-images{ justify-content:center; } }
+@media (max-width: 767px){
+
+   header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    height: auto;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .search-bar {
+    order: 2;
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  .user-info {
+    order: 1;
+    /*flex-direction: column;
+    align-items: left;*/
+    gap: 6px;
+  }
+
+  main {
+    width: 95%;
+    padding: 10px;
+    gap: 15px;
+  }
+
+  .related-images {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 0 10px;
+  }
+
+    .related-images-container {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 10px;
+    padding: 8px 0;
+    scrollbar-width: thin;            
+    scrollbar-color: #f4c52b transparent;
+  }
+
+    .related-images-container::-webkit-scrollbar {
+    height: 6px;                       
+  }
+
+  .related-images-container::-webkit-scrollbar-thumb {
+    background-color: #f4c52b;
+    border-radius: 3px;
+  }
+
+
+   .related-images img {
+    width: 140px;
+    height: 95px;
+    flex-shrink: 0;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+  }
+
+   .related-images img:hover {
+    transform: scale(1.05);
+    
+  }
+
+
+
+
+}
+</style>
+</head>
+<body>
+
+<div id="pageContent">
+<header>
+  <div class="logo"><span class="menu-icon">☰</span> BRAZUK</div>
+  <div class="search-bar">
+    <input type="text" placeholder="Buscar..." />
+    <button>🔍</button>
+  </div>
+  <!-- Contenedor del nombre y perfil -->
+  <div class="user-info">
+    <span id="nombreUsuario"></span>
+    <div class="profile-icon" id="profileIcon">👤</div>
+  </div>
+</header>
+
+<main>
+    <h2><span id="nombreUsuario"></span></h2>
+
+  <section class="main-image">
+    <img src="" alt="Imagen principal" />
+    <div class="image-info">
+      <div class="image-header">
+        <h2 id="imageTitle">Título de la imagen</h2>
+        <div class="image-actions">
+          <button id="likeBtn"><i class="fa-solid fa-thumbs-up"></i> Me gusta</button>
+          <button id="saveBtn"><i class="fa-solid fa-bookmark"></i> Guardar</button>
+        </div>
+      </div>
+      <p id="imageAuthor">Autor de la imagen</p>
+    </div>
+    <div class="related-images">
+      <button class="scroll-btn" id="scrollLeft"><i class="fa-solid fa-chevron-left"></i></button>
+      <div class="related-images-container" id="relatedContainer"></div>
+      <button class="scroll-btn" id="scrollRight"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+  </section>
+
+  <aside class="comments" id="commentsContainer">
+    <h3>Comentarios</h3>
+  </aside>
+</main>
+</div>
+
+<div class="menu-lateral" id="menuLateral">
+  <button onclick="location.href='Segundo avance_Ver historial.html'">Historial</button>
+  <button onclick="location.href='Segundo avance_Ver guardados.html'">Guardados</button>
+  <button onclick="location.href='Segundo avance_Ver me gustas.html'">Me gusta</button>
+</div>
+
+<div class="menu-lateral menu-derecha" id="menuPerfil">
+  <button onclick="location.href='Cuenta.html'">Cuenta</button>
+  <button onclick="location.href='Segundo avance_Usuario.html'">Ver mi foro</button>
+
+  <!-- Botones que se ocultarán si NO eres admin -->
+  <button id="btnSolicitudes" onclick="location.href='Segundo avance_Solicitudes.html'">Solicitudes</button>
+  <button id="btnBaneados" onclick="location.href='Segundo avance_Baneados.html'">Baneados</button>
+  <button id="btnDadasBaja" onclick="location.href='Segundo Avance_Publicaciones baneadas.html'">Dadas de baja</button>
+
+  <button id="toggleAspecto">Aspecto: Cla/Osc</button>
+  <button onclick="location.href='BrazukaR.html'">Salir</button>
+</div>
+
+
+<script>
+const likeBtn = document.getElementById('likeBtn');
+const saveBtn = document.getElementById('saveBtn');
+const mainImage = document.querySelector('.main-image img');
+const imageTitle = document.getElementById('imageTitle');
+const imageAuthor = document.getElementById('imageAuthor');
+const commentsContainer = document.getElementById('commentsContainer');
+const relatedContainer = document.getElementById('relatedContainer');
+
+const menuLateral = document.getElementById('menuLateral');
+const menuPerfil = document.getElementById('menuPerfil');
+const pageContent = document.getElementById('pageContent');
+const menuIcon = document.querySelector('.menu-icon');
+const profileIcon = document.querySelector('.profile-icon');
+
+//FOTO DE PERFIL SEGÚN EL ROL
+const rol = localStorage.getItem("rolUsuario");
+
+const fotoUsuario = document.getElementById("fotoUsuario");
+
+const fotos = {
+  admin: "https://static.vecteezy.com/system/resources/previews/014/541/527/original/administrator-system-icon-simple-style-vector.jpg",
+  usuario: "https://i0.wp.com/icon-library.com/images/user-icon-png-transparent/user-icon-png-transparent-17.jpg",
+  invitado: "https://static.vecteezy.com/system/resources/previews/008/302/462/large_2x/eps10-grey-user-icon-or-logo-in-simple-flat-trendy-modern-style-isolated-on-white-background-free-vector.jpg"
+};
+
+
+// --- ÍCONO DE LA ESQUINA ---
+if (rol === "admin") {
+  profileIcon.textContent = ""; 
+  profileIcon.style.backgroundImage = `url('${fotos.admin}')`;
+}
+else if (rol === "usuario") {
+  profileIcon.textContent = "";
+  profileIcon.style.backgroundImage = `url('${fotos.usuario}')`;
+}
+else if (rol === "invitado") {
+  profileIcon.textContent = "";
+  profileIcon.style.backgroundImage = `url('${fotos.invitado}')`;
+}
+
+profileIcon.style.backgroundSize = "cover";
+profileIcon.style.backgroundPosition = "center";
+
+// Ocultar botones según el rol
+if (rol !== "admin") {
+  document.getElementById("btnSolicitudes").style.display = "none";
+  document.getElementById("btnBaneados").style.display = "none";
+  document.getElementById("btnDadasBaja").style.display = "none";
+}
+
+/* ===== Datos e imágenes ===== */
+const imageStates = {
+  img1:{ liked:false, saved:false, comments:["Hermosa 🌅","¡Me encanta!"] },
+  img2:{ liked:false, saved:false, comments:["Muy artística 🎨","Genial"] },
+  img3:{ liked:false, saved:false, comments:["Increíble 😮","Qué lugar"] },
+  img4:{ liked:false, saved:false, comments:["Divertida 😄","Qué momento"] },
+  img5:{ liked:false, saved:false, comments:["Excelente 📷","Perfecta"] }
+};
+
+const relatedImages = [
+  {id:"img1", src:"https://ca-times.brightspotcdn.com/dims4/default/d09b97e/2147483647/strip/true/crop/3677x2451+0+0/resize/1200x800!/format/webp/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2Ff3%2F19%2Ff6728872293ad44d9e1273826f94%2F3ed037030d6d40f296bb518cb93c2a1e", title:"Imagen 1", author:"Autor 1"},
+  {id:"img2", src:"https://assets.goal.com/images/v3/bltcaa21add2d28c8db/347482.jpg?auto=webp&format=pjpg&width=2048&quality=60", title:"Imagen 2", author:"Autor 2"},
+  {id:"img3", src:"https://collect.fifa.com/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fprod-fifa-cms-storage%2Fffa8aa90-120b-4b0a-aeb4-6e242cd8eaa6.png&w=3840&q=75", title:"Imagen 3", author:"Autor 3"},
+  {id:"img4", src:"https://elbocon.pe/resizer/3TlgoRefuy-8GCjCcR2JpquqaAo=/580x330/smart/filters:format(jpeg):quality(75)/arc-anglerfish-arc2-prod-elcomercio.s3.amazonaws.com/public/WLZ6VIR7NBE43LIIDVWWSR5NL4.jpg", title:"Imagen 4", author:"Autor 4"},
+  {id:"img5", src:"https://imagenes.ambasmanos.mx/wp-content/uploads/2025/02/boletosMundial.webp", title:"Imagen 5", author:"Autor 5"}
+];
+
+let currentImageId = "img1";
+
+/* ===== FUNCIONES ===== */
+function getQueryParam(param){
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
+function loadState(){
+  const stored = localStorage.getItem('imageStates');
+  if(stored) Object.assign(imageStates, JSON.parse(stored));
+}
+function saveState(){
+  localStorage.setItem('imageStates', JSON.stringify(imageStates));
+}
+
+function updateButtons(){
+  const state = imageStates[currentImageId];
+  likeBtn.classList.toggle("active", state.liked);
+  saveBtn.classList.toggle("active", state.saved);
+}
+
+function guardarHistorial() {
+  const id = currentImageId; // usar currentImageId al cambiar imágenes
+  if(!id) return;
+
+  let thumbnailEl = document.querySelector('.main-image img') || document.querySelector('#imgJugador');
+  let thumbnailSrc = thumbnailEl?.src || 'https://via.placeholder.com/200x130';
+
+  const post = {
+    url: window.location.href,
+    thumbnail: thumbnailSrc,
+    titulo: document.querySelector('#imageTitle')?.innerText || 'Título de la imagen',
+    autor: document.querySelector('#imageAuthor')?.innerText || 'Autor',
+    tipo: thumbnailEl?.tagName.toLowerCase() === 'video' ? 'video' : 'imagen',
+    id: id,
+    timestamp: Date.now()
+  };
+
+  let historial = JSON.parse(localStorage.getItem('brazukHistorial') || '[]');
+  const index = historial.findIndex(p => p.id === post.id);
+  if(index >= 0){
+    historial[index] = {...historial[index], timestamp: Date.now()};
+    historial.unshift(historial.splice(index,1)[0]);
+  } else {
+    historial.unshift(post);
+  }
+  localStorage.setItem('brazukHistorial', JSON.stringify(historial));
+}
+
+function loadImage(image){
+  currentImageId = image.id;
+  mainImage.src = image.src;
+  imageTitle.textContent = image.title;
+  imageAuthor.textContent = image.author;
+
+  // Comentarios
+  commentsContainer.innerHTML = "<h3>Comentarios</h3>";
+  imageStates[image.id].comments.forEach(c=>{
+    const div = document.createElement("div");
+    div.className="comment";
+    div.textContent=c;
+    commentsContainer.appendChild(div);
+  });
+
+  updateButtons();
+
+// Actualizar URL sin recargar
+const newUrl = window.location.origin + window.location.pathname + '?imagen=' + image.id;
+window.history.replaceState(null,'',newUrl);
+
+// Guardar la visita en historial
+guardarHistorial();
+}
+
+/* ===== BOTONES Me gusta y Guardar ===== */
+likeBtn.onclick = () => {
+  likeBtn.classList.toggle("active");
+  const liked = likeBtn.classList.contains("active");
+
+  const id = currentImageId;
+  localStorage.setItem(`like_imagen_${id}`, liked);
+
+  const thumbnailEl = document.querySelector('.main-image img');
+  const thumbnailSrc = thumbnailEl?.src || 'https://via.placeholder.com/200x130';
+
+  if (liked) {
+    // Guardar los datos completos del post
+    const post = {
+      id: id,
+      url: window.location.href,
+      thumbnail: thumbnailSrc,
+      titulo: document.querySelector('#imageTitle')?.textContent || 'Título de la imagen',
+      autor: document.querySelector('#imageAuthor')?.textContent || 'Autor',
+      tipo: 'imagen',
+      timestamp: Date.now()
+    };
+    localStorage.setItem(`post_imagen_${id}`, JSON.stringify(post));
+  } else {
+    // Si se quita el like, no lo mostramos en "Ver Me gusta"
+    localStorage.removeItem(`post_imagen_${id}`);
+  }
+};
+
+saveBtn.onclick = () => {
+  const state = imageStates[currentImageId];
+  state.saved = !state.saved;
+  updateButtons();
+  saveState();
+
+  const guardado = state.saved;
+  const thumbnailEl = document.querySelector('.main-image img');
+  const thumbnailSrc = thumbnailEl?.src || 'https://via.placeholder.com/200x130';
+
+  const post = {
+    id: currentImageId,
+    url: window.location.href,
+    thumbnail: thumbnailSrc,
+    titulo: document.querySelector('#imageTitle')?.innerText || 'Título de la imagen',
+    autor: document.querySelector('#imageAuthor')?.innerText || 'Autor',
+    tipo: thumbnailEl?.tagName.toLowerCase() === 'video' ? 'video' : 'imagen',
+    timestamp: Date.now()
+  };
+
+  if (guardado) {
+    // Guardar en localStorage
+    localStorage.setItem(`post_imagen_${currentImageId}`, JSON.stringify(post));
+  } else {
+    // Eliminar si se desactiva
+    localStorage.removeItem(`post_imagen_${currentImageId}`);
+  }
+};
+
+
+/* ===== CARGAR ESTADO INICIAL ===== */
+loadState();
+const imgIdFromURL = getQueryParam('imagen');
+let initialImage = relatedImages[0];
+if(imgIdFromURL){
+  const found = relatedImages.find(i=>i.id===imgIdFromURL);
+  if(found) initialImage=found;
+}
+loadImage(initialImage);
+
+/* ===== IMÁGENES RELACIONADAS ===== */
+function renderRelatedImages(){
+  relatedContainer.innerHTML="";
+  relatedImages.forEach(img=>{
+    const im = document.createElement("img");
+    im.src = img.src;
+    im.dataset.id = img.id;
+    im.dataset.title = img.title;
+    im.dataset.author = img.author;
+    im.addEventListener("click", ()=> loadImage(img));
+    relatedContainer.appendChild(im);
+  });
+}
+renderRelatedImages();
+
+/* ===== SCROLL RELACIONADAS ===== */
+document.getElementById('scrollLeft').onclick = ()=> relatedContainer.scrollBy({left:-200, behavior:"smooth"});
+document.getElementById('scrollRight').onclick = ()=> relatedContainer.scrollBy({left:200, behavior:"smooth"});
+
+/* ===== MENÚS LATERALES ===== */
+menuIcon.onclick = e=>{
+  e.stopPropagation();
+  menuLateral.classList.toggle('abierto');
+  if(menuPerfil.classList.contains('abierto')) menuPerfil.classList.remove('abierto');
+  pageContent.style.transform = menuLateral.classList.contains('abierto')?"translateX(180px)":"translateX(0)";
+};
+profileIcon.onclick = e=>{
+  e.stopPropagation();
+  menuPerfil.classList.toggle('abierto');
+  if(menuLateral.classList.contains('abierto')) menuLateral.classList.remove('abierto');
+  pageContent.style.transform = menuPerfil.classList.contains('abierto')?"translateX(-180px)":"translateX(0)";
+};
+document.addEventListener('click', e=>{
+  if(!menuLateral.contains(e.target)&&!menuIcon.contains(e.target)&&menuLateral.classList.contains('abierto')){
+    menuLateral.classList.remove('abierto'); pageContent.style.transform="translateX(0)";
+  }
+  if(!menuPerfil.contains(e.target)&&!profileIcon.contains(e.target)&&menuPerfil.classList.contains('abierto')){
+    menuPerfil.classList.remove('abierto'); pageContent.style.transform="translateX(0)";
+  }
+});
+
+/* ===== LOGO ===== */
+document.querySelector('.logo').onclick = ()=>{ window.location.href="Segundo avance_Pagina Principal.html"; };
+// ===== Modo claro/oscuro global para todas las páginas =====
+(function(){
+  const menuPerfil = document.getElementById('menuPerfil');
+  if(!menuPerfil) return;
+
+  const btnModo = menuPerfil.querySelector('button:nth-child(6)');
+
+  function aplicarModo(modo){
+    const body = document.body;
+    const pageContent = document.getElementById('pageContent');
+    const header = document.querySelector('header');
+    const logo = document.querySelector('.logo');
+
+    const titulosSeccion = document.querySelectorAll('.content-section h2');
+    const controles = document.querySelectorAll('.ver-mas, .ver-menos');
+    const titulosMiniaturas = document.querySelectorAll('.media-item span');
+    const nombreUsuarioSpan = document.getElementById('nombreUsuario');
+
+    if(modo==='oscuro'){
+      body.style.background='#000';
+      if(pageContent) pageContent.style.background='#111';
+      header.style.background='#000';
+      if(logo) logo.style.color='#fff';
+      nombreUsuarioSpan.style.color = '#fff'; 
+
+      titulosSeccion.forEach(h2=>h2.style.color='#000');
+      controles.forEach(btn=>btn.style.color='#000');
+      titulosMiniaturas.forEach(span=>span.style.color='#000');
+    } else {
+      body.style.background='#fff';
+      if(pageContent) pageContent.style.background='#fff';
+      header.style.background='#f4c52b';
+      if(logo) logo.style.color='#000';
+      nombreUsuarioSpan.style.color = '#000'; 
+
+      titulosSeccion.forEach(h2=>h2.style.color='#000');
+      controles.forEach(btn=>btn.style.color='#000');
+      titulosMiniaturas.forEach(span=>span.style.color='#000');
+    }
+  }
+
+  // Aplicar modo guardado al cargar la página
+  let modoGuardado = localStorage.getItem('modoBrazuk') || 'claro';
+  aplicarModo(modoGuardado);
+
+  // Cambiar modo al hacer clic en el botón
+  btnModo.addEventListener('click', ()=>{
+    modoGuardado = (modoGuardado==='claro')?'oscuro':'claro';
+    localStorage.setItem('modoBrazuk', modoGuardado);
+    aplicarModo(modoGuardado);
+  });
+})();
+// ====== Guardar automáticamente la imagen visitada ======
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id') || params.get('mundial') || params.get('imagen'); // parámetro único
+  if(!id) return;
+
+  // Detectar la miniatura correcta (imagen principal)
+  let thumbnailEl = document.querySelector('.main-image img') || document.querySelector('#imgJugador');
+  let thumbnailSrc = thumbnailEl?.src || 'https://via.placeholder.com/200x130';
+
+  const post = {
+    url: window.location.href,
+    thumbnail: thumbnailSrc,
+    titulo: document.querySelector('#imageTitle')?.innerText || 'Título de la imagen',
+    autor: document.querySelector('#imageAuthor')?.innerText || 'Autor',
+    tipo: thumbnailEl?.tagName.toLowerCase() === 'video' ? 'video' : 'imagen',
+    id: id,
+    timestamp: Date.now()
+  };
+
+  // Cargar historial existente
+  let historial = JSON.parse(localStorage.getItem('brazukHistorial') || '[]');
+
+  // Si ya existe, actualizar timestamp y mover al inicio
+  const index = historial.findIndex(p => p.id === post.id);
+  if(index >= 0){
+    historial[index] = {...historial[index], timestamp: Date.now()};
+    // Mover al inicio
+    historial.unshift(historial.splice(index,1)[0]);
+  } else {
+    // Nuevo post: agregar al inicio
+    historial.unshift(post);
+  }
+
+  // Guardar en localStorage
+  localStorage.setItem('brazukHistorial', JSON.stringify(historial));
+})();
+
+const nombre = localStorage.getItem("nombreUsuario") || "Invitado";
+document.getElementById("nombreUsuario").textContent = `${nombre}`;
+
+</script>
+
+<div id="avisoLogo" class="aviso-logo">
+  <span>Para ver otra imagen navega hacia abajo y selecciona alguna de las que aparecen</span>
+  <button class="cerrar-aviso">×</button>
+</div>
+<script>
+  document.querySelector(".cerrar-aviso").addEventListener("click", function () {
+    document.getElementById("avisoLogo").style.display = "none";
+  });
+</script>
+
+</body>
+</html>

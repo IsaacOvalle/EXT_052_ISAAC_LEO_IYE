@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRAZUK - Mundial</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+body { background-color:#fff; overflow-x:hidden; }
+
+/* HEADER */
+header { background:#f4c52b; display:flex; align-items:center; justify-content:space-between; padding:0 20px; height:60px; border-bottom:2px solid #ccc; position:sticky; top:0; z-index:3; }
+.logo { display:flex; align-items:center; font-weight:bold; font-size:22px; cursor:pointer; line-height:1; padding-top:2px; text-decoration:none; color:#000; }
+.menu-icon { font-size:22px; margin-right:10px; cursor:pointer; }
+.search-bar { display:flex; align-items:center; background:#dfffb2; border-radius:25px; padding:5px 15px; width:40%; }
+.search-bar input { border:none; outline:none; background:transparent; width:100%; padding:5px; font-size:16px; }
+.search-bar button { background:none; border:none; cursor:pointer; font-size:18px; }
+.profile-icon { border:2px solid #000; border-radius:50%; padding:6px; cursor:pointer; }
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* espacio entre nombre y foto */
+  font-weight: 600;
+  font-size: 16px;
+  color: #000; /* color por defecto, cambiará con JS para modo oscuro */
+}
+
+.profile-icon{
+  border:2px solid #000;
+  border-radius:50%;
+  padding:6px;      
+  cursor:pointer;
+  width:50px;        
+  height:50px;    
+  background-size: cover;
+  background-position: center;
+}
+
+/* MENÚS */
+.menu-lateral, .menu-derecha { position:fixed; top:0; height:100vh; background:#f4c52b; box-shadow:3px 0 14px rgba(0,0,0,0.15); padding-top:80px; display:flex; flex-direction:column; align-items:center; gap:12px; z-index:4; transition:transform 0.32s ease; min-width:180px; }
+.menu-lateral { left:0; transform:translateX(-100%); }
+.menu-lateral.abierto { transform:translateX(0); }
+.menu-derecha { right:0; transform:translateX(100%); }
+.menu-derecha.abierto { transform:translateX(0); }
+.menu-lateral button, .menu-derecha button { width:80%; background:#baf46a; border:none; border-radius:20px; padding:10px 12px; font-weight:600; cursor:pointer; }
+.menu-lateral button:hover, .menu-derecha button:hover { background:#a4e45a; }
+
+/* CONTENIDO PRINCIPAL */
+#pageContent { transition: transform 0.32s ease; will-change: transform; }
+main { width:90%; margin:25px auto; background:#baf46a; border-radius:25px; padding:30px; }
+
+/* HEADER MUNDIAL */
+.header-jugador { display:flex; justify-content:space-between; align-items:center; }
+.header-jugador h1 { font-size:28px; }
+.video-actions { display:flex; gap:10px; }
+.video-actions button { background:transparent; border:2px solid #f4c52b; border-radius:8px; cursor:pointer; font-weight:bold; font-size:16px; display:flex; align-items:center; gap:5px; padding:6px 12px; transition:0.2s; }
+.video-actions button.active { background:#f4c52b; color:#000; border-color:#f4c52b; }
+
+/* INFO */
+.info-container { display:flex; justify-content:space-between; margin-top:10px; gap:25px; }
+.descripcion { flex:2; font-size:16px; line-height:1.5; }
+.datos-jugador { flex:1; background:#f4c52b; border-radius:25px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+.datos-jugador img { width:100%; border-radius:12px; margin-bottom:10px; }
+
+/* VIDEOS */
+.videos-section { margin-top:40px; position:relative; }
+.videos-section h2 { font-size:22px; margin-bottom:10px; }
+.videos-container { display:flex; align-items:center; justify-content:center; position:relative; background:#baf46a; }
+.videos-container iframe { width:70%; height:380px; border:none; border-radius:15px; background:#eaeaea; }
+.arrow { position:absolute; font-size:40px; background:none; border:none; top:50%; transform:translateY(-50%); cursor:pointer; }
+#prevVideo { left:5%; } #nextVideo { right:5%; }
+#videoTitulo { position:absolute; top:-25px; font-weight:bold; font-size:16px; }
+
+/* GALERÍAS */
+.fotos-section { margin-top:40px; }
+.fotos-section h2 { font-size:22px; margin-bottom:10px; }
+.fotos-container { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; }
+.fotos-container img { width:30%; border-radius:15px; border:3px solid #f4c52b; }
+
+/* COMENTARIOS Y OTROS MUNDIALES */
+.comentarios { margin-top:40px; background:#baf46a; border-radius:15px; padding:15px; display:flex; gap:20px; }
+.comments-container { flex:1; }
+.comment { background:#dfffb2; border-radius:10px; padding:8px; margin-bottom:8px; }
+.otros-jugadores { flex:1; }
+.otros-jugadores h3 { font-size:18px; margin-bottom:10px; }
+.otros-jugadores .miniatura { border:2px solid #f4c52b; border-radius:12px; overflow:hidden; margin-bottom:12px; cursor:pointer; transition:transform 0.2s; background:#f4c52b; text-align:center; }
+.otros-jugadores .miniatura img { width:100%; display:block; }
+.otros-jugadores .miniatura span { display:block; font-weight:bold; margin-top:4px; font-size:14px; }
+.otros-jugadores .miniatura:hover { transform:scale(1.05); }
+
+  .aviso-logo {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 0, 0.9);
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+  font-size: 14px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #000; 
+  font-weight: bold; 
+}
+
+.aviso-logo button.cerrar-aviso {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  color: #000; 
+}
+
+@media (max-width: 900px){ .media-item{ width:45%; } }
+@media (max-width: 520px){ .media-item{ width:90%; } }
+@media (max-width: 767px){ 
+  header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    height: auto;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .search-bar {
+    order: 2;
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  .user-info {
+    order: 1;
+    /*flex-direction: column;
+    align-items: left;*/
+    gap: 6px;
+  }
+  .info-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .descripcion, .datos-jugador {
+    width: 100%;
+  }
+
+  .datos-jugador img {
+    max-width: 300px;
+  }
+
+  .header-jugador {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .video-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+.videos-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .videos-container iframe {
+    width: 100%;
+    height: 220px;
+  }
+
+  .arrow {
+    font-size: 30px;
+    top: auto;
+    bottom: -40px;
+    transform: none;
+  }
+
+  #prevVideo {
+    left: 10px;
+  }
+
+  #nextVideo {
+    right: 10px;
+  }
+
+  #videoTitulo {
+    position: static;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .fotos-container img {
+    width: 100%;
+    max-width: 300px;
+  }
+ .comentarios {
+    flex-direction: column;
+  }
+
+  .otros-jugadores .miniatura {
+    max-width: 300px;
+    margin: 0 auto 12px;
+  }
+
+
+
+}
+</style>
+</head>
+
+<body>
+<div id="pageContent">
+<header>
+  <div class="logo"><span class="menu-icon">☰</span> BRAZUK</div>
+  <div class="search-bar"><input type="text" placeholder="Buscar..."><button>🔍</button></div>
+    <!-- Contenedor del nombre y perfil -->
+  <div class="user-info">
+    <span id="nombreUsuario"></span>
+    <div class="profile-icon" id="profileIcon">👤</div>
+  </div>
+</header>
+
+<main>
+    <h2><span id="nombreUsuario"></span></h2>
+
+  <div class="header-jugador">
+    <h1 id="nombreJugador">Nombre del Mundial</h1>
+<div class="video-actions">
+  <button id="likeBtn"><i class="fa-solid fa-thumbs-up"></i> Me gusta</button>
+  <button id="saveBtn"><i class="fa-solid fa-bookmark"></i> Guardar</button>
+  
+  <button id="TamanoTexto">
+    <i class="fa-solid fa-magnifying-glass-plus"></i> Hacer Zoom
+  </button>
+
+  <button id="Marcatexto">
+    <i class="fa-solid fa-highlighter"></i> Resaltar
+  </button>
+</div>
+  </div>
+
+  <div class="info-container">
+    <div class="descripcion" id="descripcionJugador">Descripción del mundial...</div>
+    <div class="datos-jugador">
+      <img id="imgJugador" src="https://picsum.photos/id/1050/300/200" alt="Mundial">
+      <p><strong>Año:</strong> 2022</p>
+      <p><strong>Campeón:</strong> Argentina</p>
+      <p><strong>Sede principal:</strong> Catar</p>
+    </div>
+  </div>
+
+  <section class="videos-section">
+    <h2>Videos destacados</h2>
+    <div class="videos-container">
+      <button id="prevVideo" class="arrow"><i class="fa-solid fa-chevron-left"></i></button>
+      <div id="videoTitulo"></div>
+      <iframe id="videoFrame" allowfullscreen></iframe>
+      <button id="nextVideo" class="arrow"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+  </section>
+
+  <section class="fotos-section">
+    <h2>Mejores jugadas</h2>
+    <div class="fotos-container" id="fotosJugadas"></div>
+  </section>
+
+  <section class="fotos-section">
+    <h2>Ubicaciones del mundial</h2>
+    <div class="fotos-container" id="fotosUbicaciones"></div>
+  </section>
+
+  <section class="comentarios">
+    <div class="comments-container" id="comentariosContainer"><h3>Comentarios</h3></div>
+    <div class="otros-jugadores" id="otrosJugadoresContainer"><h3>Otros Mundiales</h3></div>
+  </section>
+</main>
+</div>
+
+<div class="menu-lateral" id="menuLateral">
+  <button onclick="location.href='Segundo avance_Ver historial.html'">Historial</button>
+  <button onclick="location.href='Segundo avance_Ver guardados.html'">Guardados</button>
+  <button onclick="location.href='Segundo avance_Ver me gustas.html'">Me gusta</button>
+</div>
+
+<div class="menu-derecha" id="menuPerfil">
+  <button onclick="location.href='Cuenta.html'">Cuenta</button>
+  <button onclick="location.href='Segundo avance_Usuario.html'">Ver mi foro</button>
+
+  <!-- Botones que se ocultarán si NO eres admin -->
+  <button id="btnSolicitudes" onclick="location.href='Segundo avance_Solicitudes.html'">Solicitudes</button>
+  <button id="btnBaneados" onclick="location.href='Segundo avance_Baneados.html'">Baneados</button>
+  <button id="btnDadasBaja" onclick="location.href='Segundo Avance_Publicaciones baneadas.html'">Dadas de baja</button>
+
+  <button id="toggleAspecto">Aspecto: Cla/Osc</button>
+  <button onclick="location.href='BrazukaR.html'">Salir</button>
+</div>
+
+
+<script>
+// ===== MENÚS (REEMPLAZAR BLOQUE EXISTENTE) =====
+const menuLateral = document.getElementById('menuLateral');
+const menuPerfil  = document.getElementById('menuPerfil');
+const pageContent = document.getElementById('pageContent');
+const menuIcon    = document.querySelector('.menu-icon');
+const profileIcon = document.querySelector('.profile-icon');
+
+if (!menuLateral || !menuPerfil || !pageContent || !menuIcon || !profileIcon) {
+  // Si faltara algún elemento, no hacemos nada para evitar errores.
+  console.warn('Elementos de menú no encontrados - revisar IDs/clases');
+} else {
+  // Abrir/cerrar menú izquierdo
+  menuIcon.addEventListener('click', (e) => {
+    e.stopPropagation(); // evita que el click llegue al document
+    const abrir = !menuLateral.classList.contains('abierto');
+
+    if (abrir) {
+      menuLateral.classList.add('abierto');
+      menuPerfil.classList.remove('abierto');
+      pageContent.style.transform = "translateX(180px)";
+    } else {
+      menuLateral.classList.remove('abierto');
+      pageContent.style.transform = "translateX(0)";
+    }
+  });
+
+  // FOTO DE PERFIL SEGÚN EL ROL
+const rol = localStorage.getItem("rolUsuario");
+
+const fotoUsuario = document.getElementById("fotoUsuario");
+
+const fotos = {
+  admin: "https://static.vecteezy.com/system/resources/previews/014/541/527/original/administrator-system-icon-simple-style-vector.jpg",
+  usuario: "https://i0.wp.com/icon-library.com/images/user-icon-png-transparent/user-icon-png-transparent-17.jpg",
+  invitado: "https://static.vecteezy.com/system/resources/previews/008/302/462/large_2x/eps10-grey-user-icon-or-logo-in-simple-flat-trendy-modern-style-isolated-on-white-background-free-vector.jpg"
+};
+
+
+// --- ÍCONO DE LA ESQUINA ---
+if (rol === "admin") {
+  profileIcon.textContent = ""; 
+  profileIcon.style.backgroundImage = `url('${fotos.admin}')`;
+}
+else if (rol === "usuario") {
+  profileIcon.textContent = "";
+  profileIcon.style.backgroundImage = `url('${fotos.usuario}')`;
+}
+else if (rol === "invitado") {
+  profileIcon.textContent = "";
+  profileIcon.style.backgroundImage = `url('${fotos.invitado}')`;
+}
+
+profileIcon.style.backgroundSize = "cover";
+profileIcon.style.backgroundPosition = "center";
+
+// Ocultar botones según el rol
+if (rol !== "admin") {
+  document.getElementById("btnSolicitudes").style.display = "none";
+  document.getElementById("btnBaneados").style.display = "none";
+  document.getElementById("btnDadasBaja").style.display = "none";
+}
+
+  // Abrir/cerrar menú derecho
+  profileIcon.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const abrir = !menuPerfil.classList.contains('abierto');
+
+    if (abrir) {
+      menuPerfil.classList.add('abierto');
+      menuLateral.classList.remove('abierto');
+      pageContent.style.transform = "translateX(-180px)";
+    } else {
+      menuPerfil.classList.remove('abierto');
+      pageContent.style.transform = "translateX(0)";
+    }
+  });
+
+  // Evitar que clicks DENTRO de los paneles lleguen al document (asi no se cierra ni se resetea transform)
+  menuLateral.addEventListener('click', e => e.stopPropagation());
+  menuPerfil.addEventListener('click', e => e.stopPropagation());
+
+  // Click global: cerramos SOLO si el click ocurrió fuera de LOS DOS paneles y fuera de los botones
+  document.addEventListener('click', (e) => {
+    const clickEnMenuIzq = menuLateral.contains(e.target) || menuIcon.contains(e.target);
+    const clickEnMenuDer = menuPerfil.contains(e.target) || profileIcon.contains(e.target);
+
+    // Si el click NO fue ni en el menú ni en sus botones => cerrar todo y restaurar transform
+    if (!clickEnMenuIzq && !clickEnMenuDer) {
+      menuLateral.classList.remove('abierto');
+      menuPerfil.classList.remove('abierto');
+      pageContent.style.transform = "translateX(0)";
+    }
+    // Si el click fue dentro de un menú, NO hacer nada (por eso detenemos la propagación antes)
+  });
+
+  // Cerrar con ESC por accesibilidad
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      menuLateral.classList.remove('abierto');
+      menuPerfil.classList.remove('abierto');
+      pageContent.style.transform = "translateX(0)";
+    }
+  });
+}
+
+// ==== DATOS DE MUNDIALES ====
+const mundiales = {
+  "1": {
+    nombre: "Mundial Catar 2022",
+    descripcion: "El mundial más tecnológico, jugado en Catar, con Argentina como campeón.",
+    img: "https://cdn-3.expansion.mx/dims4/default/3956e0d/2147483647/strip/true/crop/1371x876+0+0/resize/3600x2300!/format/webp/quality/80/?url=https%3A%2F%2Fcdn-3.expansion.mx%2F6f%2Fc4%2F8766f2ff44a9b37bcd371593de2f%2Fqatar-2022.JPG",
+    videos: [
+      { url: "https://www.youtube.com/embed/FA1sR2SZAlY?si=dza-yaR0QQYAMt7K", titulo: "Final Argentina vs Francia" },
+      { url: "https://www.youtube.com/embed/-bS2RhP0w7k?si=zCbavGjc2PxOAeBt", titulo: "Las mejores jugadas" }
+    ],
+    fotosJugadas: [
+      "https://cdn2.mediotiempo.com/uploads/media/2022/12/18/messi-presiona-mbappe-quitarle-balon.jpg",
+      "https://media.cnn.com/api/v1/images/stellar/prod/cnne-1316312-argentina-v-france-final-fifa-world-cup-qatar-2022.jpg?q=w_1160,c_fill/f_webp",
+      "https://ichef.bbci.co.uk/ace/ws/800/cpsprodpb/E110/production/_127861675_492036f1-2695-4a84-838a-3046a5d5fc3e.jpg.webp"
+    ],
+    fotosUbicaciones: [
+      "https://www.infobae.com/resizer/v2/JPVCXTFXR4TAQMAXE7RU34Q6OU.jpg?auth=0893bc1223da874e2d29fec9ea3ba0b0ca0d1960c899301a46953830f48b867a&smart=true&width=992&height=664&quality=85",
+      "https://images.adsttc.com/media/images/61d5/7098/3e4b/31e0/5300/003f/newsletter/FI.jpg?1641377939"
+    ],
+    comentarios: [
+      "Increíble final entre Argentina y Francia ⚽🇦🇷",
+      "Messi logró finalmente su sueño mundialista 👑",
+      "Uno de los mundiales más emocionantes de la historia 🔥"
+    ]
+  },
+  "2": {
+    nombre: "Mundial Rusia 2018",
+    descripcion: "Un mundial lleno de sorpresas donde Francia se consagró campeón.",
+    img: "https://rare-gallery.com/thumbs/121083-2018-fifa-world-cup-russia-hd-4k.jpg",
+    videos: [
+      { url: "https://www.youtube.com/embed/nI0_wDMDDhQ?si=DShedzfKTmHW5xTw", titulo: "Goles del Mundial 2018" },
+      { url: "https://www.youtube.com/embed/cgkWFK5LTjI?si=jXQo7ntSdAMAfmEj", titulo: "Final Francia vs Croacia" }
+    ],
+    fotosJugadas: [
+      "https://imagenes.elpais.com/resizer/v2/MAZTU3SAEJIWVA4HOSIPFJSZZU.jpg?auth=268bf971d60a4bad00ed1e393eafc0c4846087370cebd2ae52052108fc62771c&width=1200",
+      "https://cms-images.acc.indazn.com/di/library/DAZN_News/60/1b/france-belgium-world-cup-2018_1oey905szrbnr1gf8ym4pqgxef.jpg?t=1456085284&quality=85&w=684",
+      "https://www.tudn.com/_next/image?url=https%3A%2F%2Fst1.uvnimg.com%2Fbb%2F93%2Fa36158a74eb89e3c77492ce7a3de%2Fgettyimages-995574778.jpg&w=1280&q=75"
+    ],
+    fotosUbicaciones: [
+      "https://www.infobae.com/resizer/v2/Q2X2AEDUX5EPPHIJ7K7JI7NYII?auth=f244900bb7246dd2326d467e908ed7959b167067a78dddee69d46b71a13ed497&smart=true&width=992&height=558&quality=85",
+      "https://www.eluniversal.com.mx/resizer/v2/YQNKNJNO5BDMHIPLPHZV3EWHUI.jpg?auth=8953856cb17f999828b6c660b5a0ddc2cf2f24b44eedc18f9bc50cb48e242b10&smart=true&width=1100&height=666"
+    ],
+    comentarios: [
+      "Francia dominó con un equipo joven y poderoso 🇫🇷",
+      "Croacia dio una gran sorpresa llegando a la final 👏",
+      "Mbappé brilló como la nueva estrella del fútbol mundial 🌟"
+    ]
+  },
+  "3": {
+    nombre: "Mundial Brasil 2014",
+    descripcion: "El mundial del 7-1 y la gloria alemana.",
+    img: "https://redgrafica.com/wp-content/uploads/2010/04/Logotipo-Mundial-de-Brasil-2014.png",
+    videos: [
+      { url: "https://www.youtube.com/embed/VWm115LT66E?si=cw5nppdvsxZsKMV4", titulo: "Alemania vs Brasil 7-1" },
+      { url: "https://www.youtube.com/embed/_WEaqRSVoG4?si=FwRwN15p821ocVdW", titulo: "Final Alemania vs Argentina" }
+    ],
+    fotosJugadas: [
+      "https://cdn.forbes.com.mx/2014/07/gotze1.jpg",
+      "https://elbocon.pe/resizer/03WT0z9S-x6loOFU5npjU4_FbZA=/980x0/smart/filters:format(jpeg):quality(75)/arc-anglerfish-arc2-prod-elcomercio.s3.amazonaws.com/public/6HTHC5P5DFCQJO7JMFYHECRCHA.jpg",
+      "https://imagens.ebc.com.br/-LEkiEQoViQi4TBaBLyQEgL1cMI=/1170x700/smart/https://agenciabrasil.ebc.com.br/sites/default/files/atoms/image/918682-partida%20brasil%20croacia-23.jpg?itok=36wn1-TB"
+    ],
+    fotosUbicaciones: [
+      "https://www.aarp.org/content/dam/aarpe/es/home/entretenimiento/musica-cultura/info-2014/trivia-historia-mundial-futbol/_jcr_content/root/container_main/container_main_top/container_quiz_9_3/container_quiz/quiz/pre-quiz/quizcontentfragment_article_image_title/cfimage.coreimg.jpeg/content/dam/aarp/entertainment/television/2017/07/1140-world-cup-trophy-ball-trivia-esp.jpg",
+      "https://images.adsttc.com/media/images/52a6/c171/e8e4/4e00/d800/01b2/large_jpg/00000000000.jpg?1386660196"
+    ],
+    comentarios: [
+      "El 7-1 a Brasil fue un momento histórico 😱",
+      "Götze le dio la gloria a Alemania con su gol en la final ⚽",
+      "James Rodríguez se consagró como goleador del torneo 🇨🇴"
+    ]
+  }
+};
+
+let id=new URLSearchParams(window.location.search).get("mundial")||"1";
+let mundial=mundiales[id];
+
+// ==== ELEMENTOS ====
+const nombreJugador=document.getElementById("nombreJugador");
+const imgJugador=document.getElementById("imgJugador");
+const descripcionJugador=document.getElementById("descripcionJugador");
+const videoFrame=document.getElementById("videoFrame");
+const videoTitulo=document.getElementById("videoTitulo");
+const comentariosContainer=document.getElementById("comentariosContainer");
+const otrosJugadoresContainer=document.getElementById("otrosJugadoresContainer");
+const fotosJugadas=document.getElementById("fotosJugadas");
+const fotosUbicaciones=document.getElementById("fotosUbicaciones");
+let currentVideo=0;
+
+function actualizarVideo(){ videoFrame.src=mundial.videos[currentVideo].url; videoTitulo.textContent=mundial.videos[currentVideo].titulo; }
+
+// ==== FOTOS ====
+function cargarFotos(){
+  fotosJugadas.innerHTML="";
+  (mundial.fotosJugadas||[]).forEach(src=>{
+    const img=document.createElement("img");
+    img.src=src;
+    img.alt="Foto jugada";
+    fotosJugadas.appendChild(img);
+  });
+  fotosUbicaciones.innerHTML="";
+  (mundial.fotosUbicaciones||[]).forEach(src=>{
+    const img=document.createElement("img");
+    img.src=src;
+    img.alt="Ubicación";
+    fotosUbicaciones.appendChild(img);
+  });
+}
+
+// ==== COMENTARIOS ====
+function cargarComentarios(){
+  comentariosContainer.innerHTML = "<h3>Comentarios</h3>";
+  const lista = mundial.comentarios || [];
+  lista.forEach(texto=>{
+    const div=document.createElement("div");
+    div.className="comment";
+    div.textContent = texto;
+    comentariosContainer.appendChild(div);
+  });
+}
+
+// ==== OTROS MUNDIALES ====
+function cargarOtros(){
+  otrosJugadoresContainer.innerHTML="<h3>Otros Mundiales</h3>";
+  for(let mid in mundiales){
+    if(mid!==id){
+      const div=document.createElement("div");
+      div.className="miniatura";
+      div.innerHTML=`<img src="${mundiales[mid].img}" alt="${mundiales[mid].nombre}"><span>${mundiales[mid].nombre}</span>`;
+      div.onclick=()=>{ window.location.href=`Segundo avance_Ver mundial.html?mundial=${mid}`; };
+      otrosJugadoresContainer.appendChild(div);
+    }
+  }
+}
+
+// ==== BOTONES ====
+const likeBtn=document.getElementById("likeBtn");
+const saveBtn=document.getElementById("saveBtn");
+const HBtn= document.getElementById('TamanoTexto');
+const MarkBtn=document.getElementById('Marcatexto');
+function cargarEstado(){
+  likeBtn.classList.toggle("active",localStorage.getItem(`like_mundial_${id}`)==="true");
+  saveBtn.classList.toggle("active",localStorage.getItem(`save_mundial_${id}`)==="true");
+}
+likeBtn.onclick = () => {
+  likeBtn.classList.toggle("active");
+  const liked = likeBtn.classList.contains("active");
+  localStorage.setItem(`like_mundial_${id}`, liked);
+
+  if(liked){
+    // Guardar los datos completos del post
+    const post = {
+      id,
+      url: window.location.href,
+      thumbnail: imgJugador.src,  // o imgVideo.src si es video
+      titulo: nombreJugador.textContent, // o título correspondiente
+      autor: 'BRAZUK',  // o el autor real
+      tipo: 'mundial',  // el tipo de post
+      timestamp: Date.now()
+    };
+    localStorage.setItem(`post_mundial_${id}`, JSON.stringify(post));
+  } else {
+    // Si se quita el like, no lo mostramos en "Ver Me gusta"
+    localStorage.removeItem(`post_mundial_${id}`);
+  }
+};
+
+
+saveBtn.onclick = () => {
+  saveBtn.classList.toggle("active");
+  const guardado = saveBtn.classList.contains("active");
+  localStorage.setItem(`save_mundial_${id}`, guardado);
+
+  if(guardado){
+    // Guardar los datos completos del post
+    const post = {
+      id,
+      url: window.location.href,
+      thumbnail: imgJugador.src,
+      titulo: nombreJugador.textContent,
+      autor: 'BRAZUK',  // puedes poner un autor real si lo tienes
+      tipo: 'imagen',
+      timestamp: Date.now()
+    };
+    localStorage.setItem(`post_mundial_${id}`, JSON.stringify(post));
+  } else {
+    // Si se quita el guardado, eliminar del localStorage
+    localStorage.removeItem(`post_mundial_${id}`);
+  }
+};
+
+HBtn.onclick=()=>{
+  HBtn.classList.toggle("active");
+  const Text = document.getElementById('descripcionJugador');
+    if (HBtn.classList.contains("active")) {
+    Text.style.fontSize = "45px"; // zoom activado
+  } else {
+    Text.style.fontSize = "16px"; // tamaño normal
+  }
+
+};
+
+MarkBtn.onclick = () => {
+  MarkBtn.classList.toggle("active");
+  const Text = document.getElementById('descripcionJugador');
+
+  if (MarkBtn.classList.contains("active")) {
+    Text.innerHTML = `<mark>${Text.textContent}</mark>`;
+  } else {
+    Text.innerHTML = Text.textContent; // quitar el resaltado
+  }
+};
+
+// ==== VIDEOS ====
+document.getElementById("nextVideo").onclick=()=>{ currentVideo=(currentVideo+1)%mundial.videos.length; actualizarVideo(); };
+document.getElementById("prevVideo").onclick=()=>{ currentVideo=(currentVideo-1+mundial.videos.length)%mundial.videos.length; actualizarVideo(); };
+
+// ==== INICIO ====
+function init(){
+  nombreJugador.textContent=mundial.nombre;
+  imgJugador.src=mundial.img;
+  descripcionJugador.textContent=mundial.descripcion;
+  actualizarVideo();
+  cargarFotos();
+  cargarComentarios();     
+  cargarEstado();
+  cargarOtros();
+}
+init();
+
+// ==== LOGO ====
+document.querySelector(".logo").onclick=()=>window.location.href="Segundo avance_Pagina Principal.html";
+// ===== Modo claro/oscuro global para todas las páginas =====
+(function(){
+  const menuPerfil = document.getElementById('menuPerfil');
+  if(!menuPerfil) return;
+
+  const btnModo = menuPerfil.querySelector('button:nth-child(6)'); 
+
+  function aplicarModo(modo){
+    const body = document.body;
+    const pageContent = document.getElementById('pageContent');
+    const header = document.querySelector('header');
+    const logo = document.querySelector('.logo');
+    const nombreUsuarioSpan = document.getElementById('nombreUsuario');
+
+    const titulosSeccion = document.querySelectorAll('.content-section h2');
+    const controles = document.querySelectorAll('.ver-mas, .ver-menos');
+    const titulosMiniaturas = document.querySelectorAll('.media-item span');
+
+    if(modo==='oscuro'){
+      body.style.background='#000';
+      if(pageContent) pageContent.style.background='#111';
+      header.style.background='#000';
+      if(logo) logo.style.color='#fff';
+        nombreUsuarioSpan.style.color = '#fff';
+
+
+      titulosSeccion.forEach(h2=>h2.style.color='#000');
+      controles.forEach(btn=>btn.style.color='#000');
+      titulosMiniaturas.forEach(span=>span.style.color='#000');
+    } else {
+      body.style.background='#fff';
+      if(pageContent) pageContent.style.background='#fff';
+      header.style.background='#f4c52b';
+      if(logo) logo.style.color='#000';
+      nombreUsuarioSpan.style.color = '#000'; 
+
+      titulosSeccion.forEach(h2=>h2.style.color='#000');
+      controles.forEach(btn=>btn.style.color='#000');
+      titulosMiniaturas.forEach(span=>span.style.color='#000');
+    }
+  }
+
+  // Aplicar modo guardado al cargar la página
+  let modoGuardado = localStorage.getItem('modoBrazuk') || 'claro';
+  aplicarModo(modoGuardado);
+
+  // Cambiar modo al hacer clic en el botón
+  btnModo.addEventListener('click', ()=>{
+    modoGuardado = (modoGuardado==='claro')?'oscuro':'claro';
+    localStorage.setItem('modoBrazuk', modoGuardado);
+    aplicarModo(modoGuardado);
+  });
+// ====== Guardar automáticamente el post visitado ======
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id') || params.get('mundial'); // parámetro único
+  if(!id) return;
+
+  // Detectar miniatura correcta según la página
+  let thumbnailEl = document.querySelector('.thumbnail img, .thumbnail video') || document.querySelector('#imgJugador');
+  let thumbnailSrc = thumbnailEl?.src || 'https://via.placeholder.com/200x130';
+
+  const post = {
+    url: window.location.href,
+    thumbnail: thumbnailSrc,
+    titulo: document.querySelector('h1, h2')?.innerText || 'Título del post',
+    autor: document.querySelector('.autor')?.innerText || 'Autor',
+    tipo: thumbnailEl?.tagName.toLowerCase() === 'video' ? 'video' : 'imagen',
+    id: id,
+    timestamp: Date.now()
+  };
+
+  // Cargar historial existente
+  let historial = JSON.parse(localStorage.getItem('brazukHistorial') || '[]');
+
+  // Si ya existe, actualizar timestamp y mover al inicio
+  const index = historial.findIndex(p => p.id === post.id);
+  if(index >= 0){
+    historial[index] = {...historial[index], timestamp: Date.now()};
+    // Mover al inicio
+    historial.unshift(historial.splice(index,1)[0]);
+  } else {
+    // Nuevo post: agregar al inicio
+    historial.unshift(post);
+  }
+
+  // Guardar en localStorage
+  localStorage.setItem('brazukHistorial', JSON.stringify(historial));
+})();
+
+const nombre = localStorage.getItem("nombreUsuario") || "Invitado";
+document.getElementById("nombreUsuario").textContent = `${nombre}`;
+
+
+})();
+</script>
+
+<div id="avisoLogo" class="aviso-logo">
+  <span>Continua bajando por la pagina para encontrar contenido relacionado de los mundiales</span>
+  <button class="cerrar-aviso">×</button>
+</div>
+<script>
+  document.querySelector(".cerrar-aviso").addEventListener("click", function () {
+    document.getElementById("avisoLogo").style.display = "none";
+  });
+</script>
+
+</body>
+</html>

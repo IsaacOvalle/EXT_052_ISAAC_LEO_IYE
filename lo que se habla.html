@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BRAZUK Lo que se habla</title>
+<style>
+:root{
+  --menu-percent: 10;
+  --menu-minpx: 180;
+  --menu-mobile-percent: 50;
+}
+
+*{ box-sizing: border-box; margin:0; padding:0; font-family: Arial, sans-serif; }
+body{ background:#fff; color:#000; overflow-x:hidden; }
+
+.page-content{ transition: transform 0.32s ease; will-change: transform; }
+
+header{
+  background:#f4c52b;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 18px;
+  height:60px;
+  border-bottom:2px solid #ccc;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+.left-header{ display:flex; align-items:center; gap:10px; }
+.menu-btn{ font-size:26px; cursor:pointer; user-select:none; }
+.logo{ font-weight:700; font-size:20px; color:#000; text-decoration:none; cursor:pointer; }
+.search-bar{ display:flex; align-items:center; background:#dfffb2; border-radius:22px; padding:6px 12px; width:40%; }
+.search-bar input{ border:none; outline:none; background:transparent; width:100%; font-size:15px; }
+.profile-icon{ border:2px solid #000; border-radius:50%; padding:6px; cursor:pointer; }
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* espacio entre nombre y foto */
+  font-weight: 600;
+  font-size: 16px;
+  color: #000; /* color por defecto, cambiará con JS para modo oscuro */
+}
+.profile-icon{
+  border:2px solid #000;
+  border-radius:50%;
+  padding:6px;       
+  cursor:pointer;
+  width:50px;       
+  height:50px;      
+  background-size: cover;
+  background-position: center;
+}
+
+/* ===== menú lateral izquierdo ===== */
+.menu-lateral{
+  position:fixed; top:0; left:0;
+  height:100vh;
+  transform: translateX(-100%);
+  background:#f4c52b;
+  box-shadow: 3px 0 14px rgba(0,0,0,0.15);
+  padding-top:80px;
+  display:flex; flex-direction:column; align-items:center;
+  gap:12px;
+  z-index:4;
+  transition: transform 0.32s ease;
+  min-width: var(--menu-width);
+}
+.menu-lateral.abierto{ transform: translateX(0); }
+
+/* ===== menú lateral derecho (perfil) ===== */
+.menu-derecha {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: auto;
+  height: 100vh;
+  transform: translateX(100%);
+  background:#f4c52b;
+  box-shadow: -3px 0 14px rgba(0,0,0,0.15);
+  padding-top: 80px;
+  display:flex; flex-direction:column; align-items:center;
+  gap:12px;
+  z-index:4;
+  transition: transform 0.32s ease;
+  min-width: var(--menu-width);
+}
+.menu-derecha.abierto { transform: translateX(0); }
+
+.menu-lateral button, .menu-derecha button{
+  width:100%; background:#baf46a; border:none; border-radius:20px;
+  padding:10px 12px; font-weight:600; cursor:pointer;
+}
+.menu-lateral button:hover, .menu-derecha button:hover{ background:#a4e45a; }
+
+
+.filters{ display:flex; justify-content:center; flex-wrap:wrap; gap:10px; padding:14px; }
+.filters button{ background:#baf46a; border:none; border-radius:20px; padding:8px 16px; cursor:pointer; font-weight:600; }
+
+main{ padding: 12px 0 40px; }
+.content-section{ background:#baf46a; border-radius:16px; margin:18px auto; width:90%; padding:18px; overflow:hidden; transition: height 0.3s ease; }
+.media-grid{ display:flex; flex-wrap:wrap; gap:14px; justify-content:space-around; }
+.media-item{
+  width:30%;
+  background:#fff;
+  border-radius:12px;
+  padding:0;
+  display:block;
+  opacity:0;
+  transform: translateY(18px);
+}
+
+.media-item img{
+  width:100%;
+  height:200px;        /* altura fija para TODAS */
+  object-fit: cover;   /* recorta y mantiene proporción */
+  border-radius:12px;
+  transition: transform 0.32s ease;
+  display:block;
+}
+
+
+.media-item h3{
+  text-align:center;
+  font-size:16px;
+  margin:8px 0;
+  color:#000;
+}
+
+.media-item img:hover{
+  transform:scale(1.05);
+}
+
+/* ===== filtros ===== */
+.filters{
+  display:flex; justify-content:center; flex-wrap:wrap; gap:10px;
+  padding:14px; background:transparent;
+}
+.filters button{
+  background:#baf46a; border:none; border-radius:20px; padding:8px 16px;
+  cursor:pointer; font-weight:600; transition: transform 0.2s ease;
+}
+.filters button:hover{transform:scale(1.3);}
+
+.media-item.show{ animation: aparecer 0.36s forwards; }
+@keyframes aparecer{ to{ opacity:1; transform: translateY(0); } }
+.controls{ text-align:center; margin-top:12px; }
+.ver-mas, .ver-menos{ display:inline-block; cursor:pointer; font-weight:700; margin:6px 6px; user-select:none; }
+.ver-menos{ display:none; }
+
+@media (max-width: 900px){ .media-item{ width:45%; } }
+@media (max-width: 520px){ .media-item{ width:90%; } }
+@media (max-width: 767px){
+
+    header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    height: auto;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .search-bar {
+    order: 2;
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  .user-info {
+    order: 1;
+    /*flex-direction: column;
+    align-items: left;*/
+    gap: 6px;
+  }
+
+  main {
+    width: 95%;
+    padding: 10px;
+  }
+
+}
+.ver-mas,
+.ver-menos {
+  color: #000 !important;
+}
+
+</style>
+</head>
+<body>
+
+<!-- menú lateral izquierdo -->
+<div class="menu-lateral" id="menuLateral">
+  <button onclick="location.href='Segundo avance_Ver historial.html'">Historial</button>
+  <button onclick="location.href='Segundo avance_Ver guardados.html'">Guardados</button>
+  <button onclick="location.href='Segundo avance_Ver me gustas.html'">Me gusta</button>
+</div>
+
+
+<!-- Menú lateral derecho (perfil) -->
+<div class="menu-lateral menu-derecha" id="menuPerfil">
+  <button onclick="location.href='Cuenta.html'">Cuenta</button>
+  <button onclick="location.href='Segundo avance_Usuario.html'">Ver mi foro</button>
+
+  <!-- Botones que se ocultarán si NO eres admin -->
+  <button id="btnSolicitudes" onclick="location.href='Segundo avance_Solicitudes.html'">Solicitudes</button>
+  <button id="btnBaneados" onclick="location.href='Segundo avance_Baneados.html'">Baneados</button>
+  <button id="btnDadasBaja" onclick="location.href='Segundo Avance_Publicaciones baneadas.html'">Dadas de baja</button>
+
+  <button id="toggleAspecto">Aspecto: Cla/Osc</button>
+  <button onclick="location.href='BrazukaR.html'">Salir</button>
+</div>
+
+
+<div class="page-content" id="pageContent">
+<header>
+  <div class="left-header">
+    <div class="menu-btn" id="menuBtn">☰</div>
+    <a href="Segundo avance_Pagina Principal.html" class="logo">BRAZUK</a>
+  </div>
+  <div class="search-bar">
+    <input type="text" placeholder="Buscar...">
+    <button aria-label="buscar">🔍</button>
+  </div>
+    <!-- Contenedor del nombre y perfil -->
+  <div class="user-info">
+    <span id="nombreUsuario"></span>
+    <div class="profile-icon" id="profileIcon">👤</div>
+  </div>
+</header>
+
+<main>
+  <h2><span id="nombreUsuario"></span></h2>
+  <section class="filters">
+    <button onclick="location.href='Segundo avance_Pagina Principal.html'">Todos</button>
+    <button onclick="location.href='MundialesBrazuka.html'">Mundiales</button>
+    <button onclick="location.href='ImagenesBrazuka.html'">Imágenes</button>
+    <button onclick="location.href='VideosBrazuka.html'">Videos</button>
+    <button onclick="location.href='EstadiosBrazuka.html'">Estadios</button>
+    <button onclick="location.href='JugadoresBrazuka.html'">Futbolistas</button>
+    <button onclick="location.href='lo que se hablo.html'">Lo que se habló</button>
+    <button onclick="location.href='lo que se habla.html'">Lo que se habla</button>
+  </section>
+
+  <!-- Sección 1 -->
+  <section class="content-section" id="seccion1" data-total="15" data-initial="10" data-batch="10">
+    <div class="media-grid"></div>
+    <div class="controls">
+      <span class="ver-mas">Ver más ⌄</span>
+      <span class="ver-menos">Ver menos ∧</span>
+    </div>
+  </section>
+</main>
+</div>
+
+<script>
+  
+// Menús laterales
+const pageContent = document.getElementById('pageContent');
+const menuBtn = document.getElementById('menuBtn');
+const menuLateral = document.getElementById('menuLateral');
+const profileIcon = document.getElementById('profileIcon');
+const menuPerfil = document.getElementById('menuPerfil');
+
+// FOTO DE PERFIL SEGÚN EL ROL
+
+const rol = localStorage.getItem("rolUsuario");
+
+const fotoUsuario = document.getElementById("fotoUsuario");
+
+const fotos = {
+  admin: "https://static.vecteezy.com/system/resources/previews/014/541/527/original/administrator-system-icon-simple-style-vector.jpg",
+  usuario: "https://i0.wp.com/icon-library.com/images/user-icon-png-transparent/user-icon-png-transparent-17.jpg",
+  invitado: "https://static.vecteezy.com/system/resources/previews/008/302/462/large_2x/eps10-grey-user-icon-or-logo-in-simple-flat-trendy-modern-style-isolated-on-white-background-free-vector.jpg"
+};
+
+
+// --- ÍCONO DE LA ESQUINA ---
+if (rol === "admin") {
+  profileIcon.textContent = ""; 
+  profileIcon.style.backgroundImage = `url('${fotos.admin}')`;
+}
+else if (rol === "usuario") {
+  profileIcon.textContent = "";
+  profileIcon.style.backgroundImage = `url('${fotos.usuario}')`;
+}
+else if (rol === "invitado") {
+  profileIcon.textContent = "";
+  profileIcon.style.backgroundImage = `url('${fotos.invitado}')`;
+}
+
+profileIcon.style.backgroundSize = "cover";
+profileIcon.style.backgroundPosition = "center";
+
+// Ocultar botones según el rol
+if (rol !== "admin") {
+  document.getElementById("btnSolicitudes").style.display = "none";
+  document.getElementById("btnBaneados").style.display = "none";
+  document.getElementById("btnDadasBaja").style.display = "none";
+}
+
+function cerrarMenus(){
+  menuLateral.classList.remove('abierto');
+  menuPerfil.classList.remove('abierto');
+  pageContent.style.transform = 'translateX(0)';
+}
+
+menuBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  const abierto = menuLateral.classList.toggle('abierto');
+  menuPerfil.classList.remove('abierto');
+  pageContent.style.transform = abierto ? 
+    `translateX(${menuLateral.offsetWidth}px)` : 'translateX(0)';
+});
+
+profileIcon.addEventListener('click', e=>{
+  e.stopPropagation();
+  const abierto = menuPerfil.classList.toggle('abierto');
+  menuLateral.classList.remove('abierto');
+  pageContent.style.transform = abierto ? 
+    `translateX(-${menuPerfil.offsetWidth}px)` : 'translateX(0)';
+});
+
+document.body.addEventListener('click', e=>{
+  if(!menuLateral.contains(e.target) &&
+     !menuBtn.contains(e.target) &&
+     !menuPerfil.contains(e.target) &&
+     !profileIcon.contains(e.target)){
+       cerrarMenus();
+  }
+});
+
+menuLateral.addEventListener('click', e=>e.stopPropagation());
+menuPerfil.addEventListener('click', e=>e.stopPropagation());
+
+
+// ===== Modo claro/oscuro =====
+const btnModo = document.getElementById('toggleAspecto');
+let modoOscuro = localStorage.getItem('modoBrazuk') === 'oscuro';
+
+function aplicarModo(activar){
+  modoOscuro = activar;
+  const body = document.body;
+  const header = document.querySelector('header');
+  const logo = document.querySelector('.logo');
+  const nombreUsuarioSpan = document.getElementById('nombreUsuario');
+
+  if(modoOscuro){
+    body.style.background='#000';
+    body.style.color='#fff';
+    header.style.background='#000';
+    pageContent.style.background='#111';
+    logo.style.color='#fff';
+    localStorage.setItem('modoBrazuk','oscuro');
+    nombreUsuarioSpan.style.color = '#fff';
+
+  } else {
+    body.style.background='#fff';
+    body.style.color='#000';
+    header.style.background='#f4c52b';
+    pageContent.style.background='#fff';
+    logo.style.color='#000';
+    localStorage.setItem('modoBrazuk','claro');
+    nombreUsuarioSpan.style.color = '#000'; 
+  }
+}
+aplicarModo(modoOscuro);
+btnModo.addEventListener('click', ()=> aplicarModo(!modoOscuro));
+
+
+// ===== Botones menú izquierdo dinámicos =====
+const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+const nombreUsuario = localStorage.getItem("nombreUsuario") || "Invitado";
+const usuarioActual = usuarios.find(u => u.nombre === nombreUsuario);
+
+
+//   SISTEMA DE POSTS 
+
+
+// Solo imagen + título + URL real
+const deLoQueSeHabla = [
+  { 
+    id: 1,
+    titulo: "Conversación sobre fútbol",
+    img: "https://imagenes.eleconomista.com.mx/files/image_1000_1000/uploads/2024/07/20/66e956f061db0.png"
+  },
+  { 
+    id: 2,
+    titulo: "Guía de las ciudades de la Copa del Mundo 2026",
+    img: "https://cdn-3.expansion.mx/dims4/default/6a5ee1c/2147483647/strip/true/crop/1200x628+0+0/resize/3600x1884!/format/webp/quality/80/?url=https%3A%2F%2Fcdn-3.expansion.mx%2F5a%2F30%2Fff12b02f477a8c66b888f3411b3e%2Fdonde-sera-mundial-2026-ciudades-sede-guia.jpg"
+  },
+  { 
+    id: 3,
+    titulo: "Mascotas del Mundial 2026",
+    img: "https://media.glamour.mx/photos/68d71d27e9e62282c0bc90a8/16:9/w_2240,c_limit/mascotas-del-mundial-2026.jpg"
+  }
+];
+
+window.addEventListener("DOMContentLoaded", () => {
+  const grid = document.querySelector("#seccion1 .media-grid");
+  grid.innerHTML = ""; 
+
+  deLoQueSeHabla.forEach(post => {
+    const div = document.createElement("div");
+    div.className = "media-item show";
+    div.style.cursor = "pointer";
+    div.style.height = "auto";
+    div.style.padding = "0";
+    div.style.background = "transparent";
+
+    div.innerHTML = `
+      <img src="${post.img}" style="width:100%; border-radius:12px;">
+      <h3 style="font-size:16px; text-align:center; margin-top:8px;">${post.titulo}</h3>
+    `;
+
+    // Clic → ir a la vista del post
+    div.addEventListener("click", () => {
+      window.location.href = "Segundo avance_Ver de lo que se habla.html?post=" + post.id;
+    });
+
+    grid.appendChild(div);
+  });
+});
+
+const nombre = localStorage.getItem("nombreUsuario") || "Invitado";
+document.getElementById("nombreUsuario").textContent = `${nombre}`;
+
+</script>
+
+
+</body>
+</html>

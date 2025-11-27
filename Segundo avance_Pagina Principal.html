@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BRAZUK - Página Principal</title>
+
+<style>
+/* Splash screen */
+#splash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #f4c52b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+
+  /* TODA la animación ocurre aquí */
+  animation: fadeOut 1s ease forwards;
+  animation-delay: 1s;
+}
+
+#splash h1 {
+  font-size: 70px;
+  font-weight: bold;
+  color: black;
+
+  /* animación interna del texto (rebote + brillo) */
+  animation:
+    appearBounce 1s ease-out forwards,
+    glow 1.5s ease-in-out infinite alternate;
+}
+
+/* --- ANIMACIONES --- */
+
+/* Aparece con rebote */
+@keyframes appearBounce {
+  0%   { opacity: 0; transform: scale(0.5); }
+  60%  { opacity: 1; transform: scale(1.15); }
+  80%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+/* Brillo suave */
+@keyframes glow {
+  from { text-shadow: 0 0 5px rgba(255,255,255,0.4); }
+  to   { text-shadow: 0 0 18px rgba(255,255,255,0.9); }
+}
+
+/* DESVANECIMIENTO + OSCURECIDO + ZOOM OUT */
+/* AHORA el texto y el fondo se van JUNTOS */
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    backdrop-filter: brightness(1);
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;                 /* Se va TODO: fondo + texto */
+    backdrop-filter: brightness(0.5);
+    transform: scale(1.3);      /* Zoom-out conjunto */
+    visibility: hidden;
+  }
+}
+/* Finaliza animacion de entrada */
+
+
+
+:root{
+  --menu-width: 180px;
+}
+
+*{ box-sizing: border-box; margin:0; padding:0; font-family: Arial, sans-serif; }
+body{ background:#fff; overflow-x:hidden; color:#000; }
+
+/* ===== page wrapper ===== */
+.page-content{
+  transition: transform 0.32s ease;
+  will-change: transform;
+}
+
+/* ===== header ===== */
+header{
+  background:#f4c52b;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 18px;
+  height:60px;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+/* línea blanca debajo del header */
+header::after {
+  content: "";
+  display: block;
+  height: 1px;
+  background: #fff;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.profile-icon{
+  border:2px solid #000;
+  border-radius:50%;
+  padding:6px;       /* se mantiene */
+  cursor:pointer;
+  width:50px;        /* nuevo tamaño */
+  height:50px;       /* nuevo tamaño */
+  background-size: cover;
+  background-position: center;
+}
+
+
+
+.left-header{ display:flex; align-items:center; gap:10px; }
+.menu-btn, .menu-icon{
+  font-size:26px;
+  cursor:pointer;
+  user-select:none;
+}
+.logo { 
+  font-weight:700; 
+  font-size:20px; 
+  color:#000;
+  border-bottom:none;
+  text-decoration: none;
+  cursor:pointer;
+}
+
+.search-bar{
+  display:flex; align-items:center;
+  background:#dfffb2; border-radius:22px;
+  padding:6px 12px; width:40%;
+}
+.search-bar input{ border:none; outline:none; background:transparent; width:100%; font-size:15px; }
+.profile-icon{ border:2px solid #000; border-radius:50%; padding:6px; cursor:pointer; }
+
+nav a{ text-decoration:none; color:#000; font-weight:500; margin-left:10px; }
+
+/* ===== menú lateral izquierdo ===== */
+.menu-lateral{
+  position:fixed; top:0; left:0;
+  height:100vh;
+  transform: translateX(-100%);
+  background:#f4c52b;
+  box-shadow: 3px 0 14px rgba(0,0,0,0.15);
+  padding-top:80px;
+  display:flex; flex-direction:column; align-items:center;
+  gap:12px;
+  z-index:4;
+  transition: transform 0.32s ease;
+  min-width: var(--menu-width);
+}
+.menu-lateral.abierto{ transform: translateX(0); }
+
+/* ===== menú lateral derecho (perfil) ===== */
+.menu-derecha {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: auto;
+  height: 100vh;
+  transform: translateX(100%);
+  background:#f4c52b;
+  box-shadow: -3px 0 14px rgba(0,0,0,0.15);
+  padding-top: 80px;
+  display:flex; flex-direction:column; align-items:center;
+  gap:12px;
+  z-index:4;
+  transition: transform 0.32s ease;
+  min-width: var(--menu-width);
+}
+.menu-derecha.abierto { transform: translateX(0); }
+
+.menu-lateral button, .menu-derecha button{
+  width:80%; background:#baf46a; border:none; border-radius:20px;
+  padding:10px 12px; font-weight:600; cursor:pointer; 
+}
+.menu-lateral button:hover, .menu-derecha button:hover{ background:#a4e45a; }
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* espacio entre nombre y foto */
+  font-weight: 600;
+  font-size: 16px;
+  color: #000; /* color por defecto, cambiará con JS para modo oscuro */
+}
+
+/* ===== filtros ===== */
+.filters{
+  display:flex; justify-content:center; flex-wrap:wrap; gap:10px;
+  padding:14px; background:transparent;
+}
+.filters button{
+  background:#baf46a; border:none; border-radius:20px; padding:8px 16px;
+  cursor:pointer; font-weight:600; transition: transform 0.2s ease;
+}
+.filters button:hover{transform:scale(1.3);}
+
+/* ===== secciones de contenido ===== */
+main{ padding: 12px 0 40px; }
+.content-section{
+  view-transition-name: content;
+  background:#baf46a; border-radius:16px; margin:18px auto;
+  width:90%; padding:18px; overflow:hidden;
+  transition: height 0.3s ease;
+
+}
+
+.media-grid{
+  display:flex; flex-wrap:wrap; gap:14px; justify-content:space-around;
+}
+
+.media-item{
+  width:30%; height:150px; background:#e6e6e6; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  flex-direction: column;
+  opacity:0; transform: translateY(18px);
+}
+.media-item.show{
+  animation: aparecer 0.36s forwards;
+}
+.media-item img{
+  width:100%;
+  height:200px;        /* altura fija para TODAS */
+  object-fit: cover;   /* recorta y mantiene proporción */
+  border-radius:12px;
+  transition: transform 0.32s ease;
+  display:block;
+}
+
+.media-item h3{
+  text-align:center;
+  font-size:14px;
+  margin:8px 0;
+  color:#000;
+}
+
+.media-item span {
+  color: black !important;
+}
+
+.media-item img:hover{
+  transform:scale(1.05);
+}
+@keyframes aparecer{
+  to{ opacity:1; transform: translateY(0); }
+}
+
+.controls{ text-align:center; margin-top:12px; }
+.ver-mas, .ver-menos{
+  display:inline-block; cursor:pointer; font-weight:700; margin:6px 6px; user-select:none;
+}
+.ver-menos{ display:none; }
+
+/* responsive */
+@media (max-width: 900px){ .media-item{ width:45%; } }
+@media (max-width: 520px){ .media-item{ width:90%; } }
+
+  @view-transition {
+    navigation: auto; /* enabled! */
+  }
+
+@media (max-width: 767px) {
+  header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    height: auto;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .search-bar {
+    order: 2;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .user-info {
+    order: 1;
+    /*flex-direction: column;
+    align-items: left;*/
+    gap: 6px;
+  }
+
+  main {
+    width: 95%;
+    padding: 10px;
+  }
+
+  .historial-container {
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .post-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .thumbnail {
+    width: 100%;
+    height: auto;
+    max-width: 300px;
+  }
+
+  .post-info {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .post-actions {
+    flex-wrap: wrap;
+  }
+
+  /*.menu-lateral,
+  .menu-derecha {
+    width: 100%;
+    min-width: unset;
+  }
+
+  /* Ajustes extra para tu grid de media */
+  .media-item {
+    width: 100%;   /* cada item ocupa todo el ancho */
+    height: auto;  /* altura flexible */
+  }
+
+  .media-item img {
+    width:100%;
+  height:200px;     /* que se ajuste a proporción */
+    max-height: 250px;
+    object-fit: cover;   /* recorta y mantiene proporción */
+  border-radius:12px;
+  display:block;
+  }
+}
+::view-transition-old(:root),
+::view-transition-new(:root) {
+  animation-duration: 0.5s;
+}
+
+@keyframes fade {
+  from { opacity: 0.2; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+::view-transition-old(content){
+  animation-name: scale-out;
+}
+
+::view-transition-new(content){
+  animation-name: scale-in;
+}
+
+@keyframes scale-in{
+  from{
+    transform: scale(0);
+  }
+  to{
+    transform: scale(1);
+  }
+}
+@keyframes scale-out{
+  from{
+    transform: scale(1);
+  }
+  to{
+    transform: scale(0);
+  }
+}
+
+.aviso-logo {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 0, 0.9);
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+  font-size: 14px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #000; 
+  font-weight: bold; 
+}
+
+.aviso-logo button.cerrar-aviso {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  color: #000; 
+}
+
+
+
+</style>
+</head>
+<body>
+  <div id="splash">
+  <h1>BRAZUK</h1>
+</div>
+
+
+<!-- menú lateral izquierdo -->
+<div class="menu-lateral" id="menuLateral">
+  <button onclick="location.href='Segundo avance_Ver historial.html'">Historial</button>
+  <button onclick="location.href='Segundo avance_Ver guardados.html'">Guardados</button>
+  <button onclick="location.href='Segundo avance_Ver me gustas.html'">Me gusta</button>
+</div>
+
+<!-- menú lateral derecho (perfil) -->
+<div class="menu-lateral menu-derecha" id="menuPerfil">
+  <button onclick="location.href='Cuenta.html'">Cuenta</button>
+  <button onclick="location.href='Segundo avance_Usuario.html'">Ver mi foro</button>
+
+  <!-- Botones que se ocultarán si NO eres admin -->
+  <button id="btnSolicitudes" onclick="location.href='Segundo avance_Solicitudes.html'">Solicitudes</button>
+  <button id="btnBaneados" onclick="location.href='Segundo avance_Baneados.html'">Baneados</button>
+  <button id="btnDadasBaja" onclick="location.href='Segundo Avance_Publicaciones baneadas.html'">Dadas de baja</button>
+
+  <button id="toggleAspecto">Aspecto: Cla/Osc</button>
+  <button onclick="location.href='BrazukaR.html'">Salir</button>
+</div>
+
+
+<!-- contenido principal -->
+<div class="page-content"  id="pageContent">
+ <header>
+  <div class="logo-container left-header">
+    <span class="menu-icon" id="menuBtn">☰</span>
+    <a href="Segundo avance_Pagina Principal.html" class="logo">BRAZUK</a>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" placeholder="Buscar..." />
+    <button>🔍</button>
+  </div>
+
+  <!-- Contenedor del nombre y perfil -->
+  <div class="user-info">
+    <span id="nombreUsuario"></span>
+    <div class="profile-icon" id="profileIcon">👤</div>
+  </div>
+
+</header>
+
+<main>
+  <h2><span id="nombreUsuario"></span></h2>
+
+  <section class="filters">
+    <button onclick="location.href='Segundo avance_Pagina Principal.html'">Todos</button>
+    <button onclick="location.href='MundialesBrazuka.html'">Mundiales</button>
+    <button onclick="location.href='ImagenesBrazuka.html'">Imágenes</button>
+    <button onclick="location.href='VideosBrazuka.html'">Videos</button>
+    <button onclick="location.href='EstadiosBrazuka.html'">Estadios</button>
+    <button onclick="location.href='JugadoresBrazuka.html'">Futbolistas</button>
+    <button onclick="location.href='lo que se hablo.html'">Lo que se habló</button>
+    <button onclick="location.href='lo que se habla.html'">Lo que se habla</button>
+  </section>
+
+  <section class="content-section" id="seccion5" data-total="3" data-initial="3" data-batch="3">
+    <h2 style="margin-bottom:12px; color:#000;">Mundiales</h2>
+    <div class="media-grid"></div>
+    <div class="controls">
+      <span class="ver-mas">Ver más ⌄</span>
+      <span class="ver-menos">Ver menos ∧</span>
+    </div>
+  </section>
+
+  <section class="content-section" id="seccion1" data-total="15" data-initial="3" data-batch="3">
+    <h2 style="margin-bottom:12px; color:#000;">Imágenes</h2>
+    <div class="media-grid"></div>
+    <div class="controls">
+      <span class="ver-mas">Ver más ⌄</span>
+      <span class="ver-menos">Ver menos ∧</span>
+    </div>
+  </section>
+
+  <section class="content-section" id="seccion2" data-total="12" data-initial="3" data-batch="3">
+    <h2 style="margin-bottom:12px; color:#000;">Videos</h2>
+    <div class="media-grid"></div>
+    <div class="controls">
+      <span class="ver-mas">Ver más ⌄</span>
+      <span class="ver-menos">Ver menos ∧</span>
+    </div>
+  </section>
+
+  <section class="content-section" id="seccion3" data-total="3" data-initial="3" data-batch="3">
+    <h2 style="margin-bottom:12px; color:#000;">Estadios</h2>
+    <div class="media-grid"></div>
+    <div class="controls">
+      <span class="ver-mas">Ver más ⌄</span>
+      <span class="ver-menos">Ver menos ∧</span>
+    </div>
+  </section>
+
+  <section class="content-section" id="seccion4" data-total="3" data-initial="3" data-batch="3">
+    <h2 style="margin-bottom:12px; color:#000;">Futbolistas</h2>
+    <div class="media-grid"></div>
+    <div class="controls">
+      <span class="ver-mas">Ver más ⌄</span>
+      <span class="ver-menos">Ver menos ∧</span>
+    </div>
+  </section>
+
+  <section class="content-section" id="seccion6" data-total="3" data-initial="3" data-batch="3">
+    <h2 style="margin-bottom:12px; color:#000;">De lo que se habla</h2>
+    <div class="media-grid"></div>
+    <div class="controls">
+      <span class="ver-mas">Ver más ⌄</span>
+      <span class="ver-menos">Ver menos ∧</span>
+    </div>
+  </section>
+
+  <section class="content-section" id="seccion7" data-total="3" data-initial="3" data-batch="3">
+    <h2 style="margin-bottom:12px; color:#000;">De lo que se habló</h2>
+    <div class="media-grid"></div>
+    <div class="controls">
+      <span class="ver-mas">Ver más ⌄</span>
+      <span class="ver-menos">Ver menos ∧</span>
+    </div>
+  </section>
+</main>
+</div>
+
+<script>
+(function(){ 
+// ===== Datos de contenido =====
+const mundiales = [
+  { id: 1, nombre: "Mundial Catar 2022", img: "https://cdn-3.expansion.mx/dims4/default/3956e0d/2147483647/strip/true/crop/1371x876+0+0/resize/3600x2300!/format/webp/quality/80/?url=https%3A%2F%2Fcdn-3.expansion.mx%2F6f%2Fc4%2F8766f2ff44a9b37bcd371593de2f%2Fqatar-2022.JPG", url: "Segundo avance_Ver mundial.html?mundial=1" },
+  { id: 2, nombre: "Mundial Rusia 2018", img: "https://www.aden.org/wp-content/uploads/sites/9/2018/05/logotipo_fifa2018_russia.jpg", url: "Segundo avance_Ver mundial.html?mundial=2" },
+  { id: 3, nombre: "Mundial Brasil 2014", img: "https://redgrafica.com/wp-content/uploads/2010/04/Logotipo-Mundial-de-Brasil-2014.png", url: "Segundo avance_Ver mundial.html?mundial=3" }
+];
+
+const relatedImages = [
+  {id:"img1", src:"https://ca-times.brightspotcdn.com/dims4/default/d09b97e/2147483647/strip/true/crop/3677x2451+0+0/resize/1200x800!/format/webp/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2Ff3%2F19%2Ff6728872293ad44d9e1273826f94%2F3ed037030d6d40f296bb518cb93c2a1e", title:"Imagen 1"},
+  {id:"img2", src:"https://assets.goal.com/images/v3/bltcaa21add2d28c8db/347482.jpg?auto=webp&format=pjpg&width=2048&quality=60", title:"Imagen 2"},
+  {id:"img3", src:"https://collect.fifa.com/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fprod-fifa-cms-storage%2Fffa8aa90-120b-4b0a-aeb4-6e242cd8eaa6.png&w=3840&q=75", title:"Imagen 3"},
+  {id:"img4", src:"https://elbocon.pe/resizer/3TlgoRefuy-8GCjCcR2JpquqaAo=/580x330/smart/filters:format(jpeg):quality(75)/arc-anglerfish-arc2-prod-elcomercio.s3.amazonaws.com/public/WLZ6VIR7NBE43LIIDVWWSR5NL4.jpg", title:"Imagen 4"},
+  {id:"img5", src:"https://imagenes.ambasmanos.mx/wp-content/uploads/2025/02/boletosMundial.webp", title:"Imagen 5"}
+];
+
+const videos = [
+  { id: "video1", thumbnail:"https://img.youtube.com/vi/283zhbH7iig/maxresdefault.jpg", title:"Germany - Argentina World Cup 2014 final | Highlights | 4K UHD 60 fps" },
+  { id: "video2", thumbnail:"https://img.youtube.com/vi/hMl5Ni7s6uc/maxresdefault.jpg", title:"Neymar acting & rolling || neymar funniest moments || Worldcup Brazil" },
+  { id: "video3", thumbnail:"https://img.youtube.com/vi/RAt-fzSVamY/maxresdefault.jpg", title:"Todos los CAMPEONES y FINALES de los MUNDIALES (1930-2022)" },
+  { id: "video4", thumbnail:"https://img.youtube.com/vi/NTzefzfCH0M/maxresdefault.jpg", title:"MASCOTAS DEL MUNDIAL: Una retrospectiva" },
+  { id: "video5", thumbnail:"https://img.youtube.com/vi/WvzmlLuX8AQ/maxresdefault.jpg", title:"Las CANCIONES de Todos los MUNDIALES DE FÚTBOL (1930-2022)" }
+];
+
+const futbolistas = [
+  { id: "1", nombre: "Neymar Jr", img:"https://media.admagazine.com/photos/639234d7b8ad7f584f3708df/16:9/w_2240,c_limit/GettyImages-1443106332.jpg" },
+  { id: "2", nombre: "Cristiano Ronaldo", img:"https://hips.hearstapps.com/hmg-prod/images/cristiano-ronaldo-of-portugal-during-the-uefa-nations-news-photo-1748359673.pjpeg?crop=0.610xw:0.917xh;0.317xw,0.0829xh&resize=1800:*" },
+  { id: "3", nombre: "Lionel Messi", img:"https://upload.wikimedia.org/wikipedia/commons/b/b4/Lionel-Messi-Argentina-2022-FIFA-World-Cup_%28cropped%29.jpg" }
+];
+
+const estadios = [
+  { id: 1, nombre:"Maracaná", img:"https://images.adsttc.com/media/images/5398/b4a1/c07a/8056/9e00/06be/newsletter/schlaich_bergermann_und_partner_Estadio_Maracana_1771_2880px.jpg?1402516621" },
+  { id: 2, nombre:"Santiago Bernabéu", img:"https://images.adsttc.com/media/images/6526/e5c2/64e5/0c5f/47f3/0877/newsletter/l35-architects-sobre-la-remodelacion-del-estadio-santiago-bernabeu-de-madrid-a-pocos-meses-de-finalizar_16.jpg?1697048007" },
+  { id: 3, nombre:"Old Trafford", img:"https://tse2.mm.bing.net/th/id/OIP.cmC4XTXo5t3Wrg89QqTcBgHaE6?rs=1&pid=ImgDetMain&o=7&rm=3" }
+];
+
+const deLoQueSeHabla = [
+  { id: "habla1", nombre: "Conversación sobre fútbol", img: "https://imagenes.eleconomista.com.mx/files/image_1000_1000/uploads/2024/07/20/66e956f061db0.png", url: "Segundo avance_Ver de lo que se habla.html?post=1" },
+  { id: "habla2", nombre: "Guía de las ciudades de la Copa del Mundo 2026: México, Estados Unidos y Canadá", img: "https://cdn-3.expansion.mx/dims4/default/6a5ee1c/2147483647/strip/true/crop/1200x628+0+0/resize/3600x1884!/format/webp/quality/80/?url=https%3A%2F%2Fcdn-3.expansion.mx%2F5a%2F30%2Fff12b02f477a8c66b888f3411b3e%2Fdonde-sera-mundial-2026-ciudades-sede-guia.jpg", url: "Segundo avance_Ver de lo que se habla.html?post=2" },
+  { id: "habla3", nombre: "Mascotas del Mundial 2026: cómo se llaman y qué significan", img: "https://media.glamour.mx/photos/68d71d27e9e62282c0bc90a8/16:9/w_2240,c_limit/mascotas-del-mundial-2026.jpg", url: "Segundo avance_Ver de lo que se habla.html?post=3" }
+];
+
+const deLoQueSeHablo = [
+  { id: "hablado1", nombre: "Conversación pasada sobre fútbol", img: "https://www.eedeporte.com/wp-content/uploads/MINIBLOGS-6.png", url: "Segundo avance_Ver de lo que se hablo.html?Hablo=1" },
+  { id: "hablado2", nombre: "8 cosas que aprendimos de la Copa Mundial Qatar 2022", img: "https://clubculturaarabe.com/wp-content/uploads/2023/01/Qatar-2022-cover2.jpg", url: "Segundo avance_Ver de lo que se hablo.html?Hablo=2" },
+  { id: "hablado3", nombre: "De la ducha al Maracaná: la historia de “Brasil, decime qué se siente”, el himno del Mundial 2014", img: "https://upload.wikimedia.org/wikipedia/commons/3/36/Argentinian_fans_in_Rio_de_Janeiro_05.jpg", url: "Segundo avance_Ver de lo que se hablo.html?Hablo=3" }
+];
+
+
+// ===== Función para crear item =====
+function crearItemHTML(item, sectionId) {
+  const div = document.createElement('div');
+  div.className = 'media-item show';
+
+  if (item) {
+
+    // ===== VIDEOS =====
+    if (sectionId === "seccion2") {
+      div.innerHTML = `
+        <img src="${item.thumbnail}" alt="${item.title}" 
+             style="max-width:80%; max-height:80%">
+        <br>
+        <span style="font-weight:bold;">${item.title}</span>
+      `;
+      div.style.cursor = "pointer";
+      div.addEventListener('click', () => {
+        location.href = "Segundo avance_Ver Video.html?video=" + item.id;
+      });
+    }
+
+    // ===== IMÁGENES =====
+    else if (sectionId === "seccion1") {
+      div.innerHTML = `
+        <img src="${item.src}" alt="${item.title}" 
+             style="max-width:80%; max-height:80%;">
+        <br>
+        <span style="font-weight:bold;">${item.title}</span>
+      `;
+      div.style.cursor = "pointer";
+      div.addEventListener('click', () => {
+        location.href = "Segundo avance_Ver Imagen.html?imagen=" + item.id;
+      });
+    }
+
+    // ===== FUTBOLISTAS =====
+    else if (sectionId === "seccion4") {
+      div.innerHTML = `
+        <img src="${item.img}" alt="${item.nombre}" 
+             style="max-width:80%; max-height:80%; border-radius:8px;">
+        <br>
+        <span style="font-weight:bold;">${item.nombre}</span>
+      `;
+      div.style.cursor = "pointer";
+      div.addEventListener('click', () => {
+        location.href = "Segundo avance_Ver jugador.html?jugador=" + item.id;
+      });
+    }
+
+    // ===== ESTADIOS =====
+    else if (sectionId === "seccion3") {
+      div.innerHTML = `
+        <img src="${item.img}" alt="${item.nombre}" 
+             style="max-width:80%; max-height:80%; border-radius:8px;">
+        <br>
+        <span style="font-weight:bold;">${item.nombre}</span>
+      `;
+      div.style.cursor = "pointer";
+      div.addEventListener('click', () => {
+        location.href = "Segundo avance_Ver estadio.html?estadio=" + item.id;
+      });
+    }
+
+    // ===== MUNDIALES =====
+    else if (sectionId === "seccion5") {
+      div.innerHTML = `
+        <img src="${item.img}" alt="${item.nombre}" 
+             style="max-width:80%; max-height:80%; border-radius:8px;">
+        <br>
+        <span style="font-weight:bold;">${item.nombre}</span>
+      `;
+      div.style.cursor = "pointer";
+      div.addEventListener('click', () => {
+        location.href = item.url;
+      });
+    }
+
+    // ===== DE LO QUE SE HABLA / SE HABLÓ =====
+    else if (sectionId === "seccion6" || sectionId === "seccion7") {
+      div.innerHTML = `
+        <img src="${item.img}" alt="${item.nombre}" 
+             style="max-width:80%; max-height:80%; border-radius:8px;">
+        <br>
+        <span style="font-weight:bold;">${item.nombre}</span>
+      `;
+      div.style.cursor = "pointer";
+      div.addEventListener('click', () => {
+        location.href = item.url;
+      });
+    }
+
+  }
+
+  return div;
+}
+
+
+// ===== Función para inicializar secciones =====
+function initSection(sectionId, data){
+  const section = document.getElementById(sectionId);
+  const grid = section.querySelector('.media-grid');
+  const total = data.length;
+  let visible = parseInt(section.dataset.initial);
+
+  function render(){
+    grid.innerHTML = '';
+    for(let i=0;i<visible;i++){
+      if(data[i]) grid.appendChild(crearItemHTML(data[i], sectionId));
+    }
+    section.querySelector('.ver-mas').style.display = visible<total?'inline-block':'none';
+    section.querySelector('.ver-menos').style.display = visible>parseInt(section.dataset.initial)?'inline-block':'none';
+  }
+
+  section.querySelector('.ver-mas').addEventListener('click', ()=>{ 
+    visible += parseInt(section.dataset.batch); 
+    if(visible>total) visible=total; 
+    render(); 
+  });
+
+  section.querySelector('.ver-menos').addEventListener('click', ()=>{
+    visible -= parseInt(section.dataset.batch);
+    if(visible<parseInt(section.dataset.initial)) visible=parseInt(section.dataset.initial);
+    render();
+  });
+
+  render();
+}
+
+// ===== Inicializar todas las secciones =====
+initSection("seccion1", relatedImages);
+initSection("seccion2", videos);
+initSection("seccion3", estadios);
+initSection("seccion4", futbolistas);
+initSection("seccion5", mundiales);
+initSection("seccion6", deLoQueSeHabla);
+initSection("seccion7", deLoQueSeHablo);
+
+// ===== Menús laterales y desplazamiento contenido =====
+const pageContent = document.getElementById('pageContent');
+const menuBtn = document.getElementById('menuBtn');
+const menuLateral = document.getElementById('menuLateral');
+const profileIcon = document.getElementById('profileIcon');
+const menuPerfil = document.getElementById('menuPerfil');
+
+function cerrarMenus(){
+  menuLateral.classList.remove('abierto');
+  menuPerfil.classList.remove('abierto');
+  pageContent.style.transform='translateX(0)';
+}
+
+menuBtn.addEventListener('click',(e)=>{
+  e.stopPropagation();
+  menuLateral.classList.toggle('abierto');
+  menuPerfil.classList.remove('abierto');
+  if(menuLateral.classList.contains('abierto')){
+    pageContent.style.transform = `translateX(${getComputedStyle(menuLateral).minWidth})`;
+  } else { pageContent.style.transform='translateX(0)'; }
+});
+
+profileIcon.addEventListener('click',(e)=>{
+  e.stopPropagation();
+  menuPerfil.classList.toggle('abierto');
+  menuLateral.classList.remove('abierto');
+  if(menuPerfil.classList.contains('abierto')){
+    pageContent.style.transform = `translateX(-${getComputedStyle(menuPerfil).minWidth})`;
+  } else { pageContent.style.transform='translateX(0)'; }
+});
+
+document.body.addEventListener('click', (e)=>{
+  if(!menuLateral.contains(e.target) && !menuBtn.contains(e.target) &&
+     !menuPerfil.contains(e.target) && !profileIcon.contains(e.target)){
+       cerrarMenus();
+  }
+});
+
+menuLateral.addEventListener('click', e=>e.stopPropagation());
+menuPerfil.addEventListener('click', e=>e.stopPropagation());
+
+// ===== Botón de modo claro/oscuro con persistencia =====
+document.addEventListener('DOMContentLoaded', ()=>{
+  const btnModo = menuPerfil.querySelector('button:nth-child(6)'); 
+  let modoOscuro = localStorage.getItem('modoBrazuk') === 'oscuro';
+
+  const body = document.body;
+  const header = document.querySelector('header');
+  const logo = document.querySelector('.logo');
+  const titulosSeccion = document.querySelectorAll('.content-section h2');
+  const controles = document.querySelectorAll('.ver-mas, .ver-menos');
+  const titulosMiniaturas = document.querySelectorAll('.media-item span');
+  const nombreUsuarioSpan = document.getElementById('nombreUsuario');
+
+
+  function aplicarModo(activar){
+    modoOscuro = activar;
+
+    if(modoOscuro){
+      body.style.background = '#000';
+      body.style.color = '#fff';
+      header.style.background = '#000';
+      pageContent.style.background = '#111';
+      logo.style.color = '#fff';
+      nombreUsuarioSpan.style.color = '#fff'; 
+      titulosSeccion.forEach(h2=>h2.style.color='#000');
+      controles.forEach(btn=>btn.style.color='#000');
+      titulosMiniaturas.forEach(span=>span.style.color='#000');
+      localStorage.setItem('modoBrazuk','oscuro');
+    } else {
+      body.style.background = '#fff';
+      body.style.color = '#000';
+      header.style.background = '#f4c52b';
+      pageContent.style.background = '#fff';
+      logo.style.color = '#000';
+      nombreUsuarioSpan.style.color = '#000'; 
+      titulosSeccion.forEach(h2=>h2.style.color='#000');
+      controles.forEach(btn=>btn.style.color='#000');
+      titulosMiniaturas.forEach(span=>span.style.color='#000');
+      localStorage.setItem('modoBrazuk','claro');
+    }
+  }
+
+  aplicarModo(modoOscuro);
+
+  btnModo.addEventListener('click', ()=>{ aplicarModo(!modoOscuro); });
+});
+})();
+const nombre = localStorage.getItem("nombreUsuario") || "Invitado";
+document.getElementById("nombreUsuario").textContent = `${nombre}`;
+
+function cambiarContenido(htmlNuevo) {
+  if (!('startViewTransition' in document)) {
+    document.querySelector('.page-content').innerHTML = htmlNuevo;
+    return;
+  }
+
+  document.startViewTransition(() => {
+    document.querySelector('.page-content').innerHTML = htmlNuevo;
+  });
+}
+
+
+//  FOTO DE PERFIL SEGÚN EL ROL
+
+const rol = localStorage.getItem("rolUsuario");
+
+const fotoUsuario = document.getElementById("fotoUsuario");
+
+const fotos = {
+  admin: "https://static.vecteezy.com/system/resources/previews/014/541/527/original/administrator-system-icon-simple-style-vector.jpg",
+  usuario: "https://i0.wp.com/icon-library.com/images/user-icon-png-transparent/user-icon-png-transparent-17.jpg",
+  invitado: "https://static.vecteezy.com/system/resources/previews/008/302/462/large_2x/eps10-grey-user-icon-or-logo-in-simple-flat-trendy-modern-style-isolated-on-white-background-free-vector.jpg"
+};
+
+
+// --- ÍCONO DE LA ESQUINA ---
+if (rol === "admin") {
+  profileIcon.textContent = ""; 
+  profileIcon.style.backgroundImage = `url('${fotos.admin}')`;
+}
+else if (rol === "usuario") {
+  profileIcon.textContent = "";
+  profileIcon.style.backgroundImage = `url('${fotos.usuario}')`;
+}
+else if (rol === "invitado") {
+  profileIcon.textContent = "";
+  profileIcon.style.backgroundImage = `url('${fotos.invitado}')`;
+}
+
+profileIcon.style.backgroundSize = "cover";
+profileIcon.style.backgroundPosition = "center";
+
+// Ocultar botones según el rol
+if (rol !== "admin") {
+  document.getElementById("btnSolicitudes").style.display = "none";
+  document.getElementById("btnBaneados").style.display = "none";
+  document.getElementById("btnDadasBaja").style.display = "none";
+}
+
+
+</script>
+
+<div id="avisoLogo" class="aviso-logo">
+  <span>Si pulsas el logo de BRAZUK regresarás a la página principal, accede a los menus pulsando en las 3 barras a la izquierda o en tu foto de perfil</span>
+  <button class="cerrar-aviso">×</button>
+</div>
+<script>
+  document.querySelector(".cerrar-aviso").addEventListener("click", function () {
+    document.getElementById("avisoLogo").style.display = "none";
+  });
+</script>
+
+</body>
+</html>

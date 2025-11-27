@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRAZUK - Estadio</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+body { background-color:#fff; overflow-x:hidden; }
+
+/* HEADER */
+header { background:#f4c52b; display:flex; align-items:center; justify-content:space-between; padding:0 20px; height:60px; border-bottom:2px solid #ccc; position:sticky; top:0; z-index:3; }
+.logo { display:flex; align-items:center; font-weight:bold; font-size:22px; cursor:pointer; line-height:1; padding-top:2px; }
+.menu-icon { font-size:22px; margin-right:10px; cursor:pointer; }
+.search-bar { display:flex; align-items:center; background:#dfffb2; border-radius:25px; padding:5px 15px; width:40%; }
+.search-bar input { border:none; outline:none; background:transparent; width:100%; padding:5px; font-size:16px; }
+.search-bar button { background:none; border:none; cursor:pointer; font-size:18px; }
+.profile-icon { border:2px solid #000; border-radius:50%; padding:6px; cursor:pointer; }
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* espacio entre nombre y foto */
+  font-weight: 600;
+  font-size: 16px;
+  color: #000; /* color por defecto, cambiará con JS para modo oscuro */
+}
+
+.profile-icon{
+  border:2px solid #000;
+  border-radius:50%;
+  padding:6px;     
+  cursor:pointer;
+  width:50px;     
+  height:50px;      
+  background-size: cover;
+  background-position: center;
+}
+
+/* MENÚS */
+.menu-lateral, .menu-derecha { position:fixed; top:0; height:100vh; background:#f4c52b; box-shadow:3px 0 14px rgba(0,0,0,0.15); padding-top:80px; display:flex; flex-direction:column; align-items:center; gap:12px; z-index:4; transition:transform 0.32s ease; min-width:180px; }
+.menu-lateral { left:0; transform:translateX(-100%); }
+.menu-lateral.abierto { transform:translateX(0); }
+.menu-derecha { right:0; transform:translateX(100%); }
+.menu-derecha.abierto { transform:translateX(0); }
+.menu-lateral button, .menu-derecha button { width:80%; background:#baf46a; border:none; border-radius:20px; padding:10px 12px; font-weight:600; cursor:pointer; }
+.menu-lateral button:hover, .menu-derecha button:hover { background:#a4e45a; }
+
+/* CONTENIDO PRINCIPAL */
+#pageContent { transition: transform 0.32s ease; will-change: transform; }
+main { width:90%; margin:25px auto; background:#baf46a; border-radius:25px; padding:30px; }
+
+/* HEADER ESTADIO */
+.header-jugador { display:flex; justify-content:space-between; align-items:center; }
+.header-jugador h1 { font-size:28px; }
+.video-actions { display:flex; gap:10px; }
+.video-actions button { background:transparent; border:2px solid #f4c52b; border-radius:8px; cursor:pointer; font-weight:bold; font-size:16px; display:flex; align-items:center; gap:5px; padding:6px 12px; transition:0.2s; }
+.video-actions button.active { background:#f4c52b; color:#000; border-color:#f4c52b; }
+
+/* INFO */
+.info-container { display:flex; justify-content:space-between; margin-top:10px; gap:25px; }
+.descripcion { flex:2; font-size:16px; line-height:1.5; }
+.datos-jugador { flex:1; background:#f4c52b; border-radius:25px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+.datos-jugador img { width:100%; border-radius:12px; margin-bottom:10px; }
+
+/* VIDEOS */
+.videos-section { margin-top:40px; position:relative; }
+.videos-section h2 { font-size:22px; margin-bottom:10px; }
+.videos-container { display:flex; align-items:center; justify-content:center; position:relative; background:#baf46a; }
+.videos-container iframe { width:70%; height:380px; border:none; border-radius:15px; background:#eaeaea; }
+.arrow { position:absolute; font-size:40px; background:none; border:none; top:50%; transform:translateY(-50%); cursor:pointer; }
+#prevVideo { left:5%; } #nextVideo { right:5%; }
+#videoTitulo { position:absolute; top:-25px; font-weight:bold; font-size:16px; }
+
+/* COMENTARIOS Y OTROS ESTADIOS */
+.comentarios { margin-top:40px; background:#baf46a; border-radius:15px; padding:15px; display:flex; gap:20px; }
+.comments-container { flex:1; }
+.comment { background:#dfffb2; border-radius:10px; padding:8px; margin-bottom:8px; }
+.otros-jugadores { flex:1; }
+.otros-jugadores h3 { font-size:18px; margin-bottom:10px; }
+.otros-jugadores .miniatura { border:2px solid #f4c52b; border-radius:12px; overflow:hidden; margin-bottom:12px; cursor:pointer; transition:transform 0.2s; background:#f4c52b; text-align:center; }
+.otros-jugadores .miniatura img { width:100%; display:block; }
+.otros-jugadores .miniatura span { display:block; font-weight:bold; margin-top:4px; font-size:14px; }
+.otros-jugadores .miniatura.active { background:#f4c52b; border-color:#f4c52b; }
+.otros-jugadores .miniatura:hover { transform:scale(1.05); }
+
+.aviso-logo {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 0, 0.9);
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+  font-size: 14px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #000; 
+  font-weight: bold; 
+}
+
+.aviso-logo button.cerrar-aviso {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  color: #000; 
+}
+
+@media (max-width: 900px){ .media-item{ width:45%; } }
+@media (max-width: 520px){ .media-item{ width:90%; } }
+@media (max-width: 767px){ 
+   header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    height: auto;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .search-bar {
+    order: 2;
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  .user-info {
+    order: 1;
+    /*flex-direction: column;
+    align-items: left;*/
+    gap: 6px;
+  }
+
+  .info-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .descripcion, .datos-jugador {
+    width: 100%;
+  }
+
+  .datos-jugador img {
+    max-width: 300px;
+  }
+
+  .header-jugador {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .video-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+.videos-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .videos-container iframe {
+    width: 100%;
+    height: 220px;
+  }
+
+  .arrow {
+    font-size: 30px;
+    top: auto;
+    bottom: -40px;
+    transform: none;
+  }
+
+  #prevVideo {
+    left: 10px;
+  }
+
+  #nextVideo {
+    right: 10px;
+  }
+
+  #videoTitulo {
+    position: static;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .fotos-container img {
+    width: 100%;
+    max-width: 300px;
+  }
+ .comentarios {
+    flex-direction: column;
+  }
+
+  .otros-jugadores .miniatura {
+    max-width: 300px;
+    margin: 0 auto 12px;
+  }
+
+  
+
+}
+</style>
+</head>
+
+<body>
+<div id="pageContent">
+<header>
+  <div class="logo">
+    <span class="menu-icon">☰</span> BRAZUK
+  </div>
+  <div class="search-bar"><input type="text" placeholder="Buscar..."><button>🔍</button></div>
+  <!-- Contenedor del nombre y perfil -->
+  <div class="user-info">
+    <span id="nombreUsuario"></span>
+    <div class="profile-icon" id="profileIcon">👤</div>
+  </div></header>
+
+<main>
+    <h2><span id="nombreUsuario"></span></h2>
+
+  <div class="header-jugador">
+    <h1 id="nombreJugador">Nombre del Estadio</h1>
+<div class="video-actions">
+  <button id="likeBtn"><i class="fa-solid fa-thumbs-up"></i> Me gusta</button>
+  <button id="saveBtn"><i class="fa-solid fa-bookmark"></i> Guardar</button>
+  
+  <button id="TamanoTexto">
+    <i class="fa-solid fa-magnifying-glass-plus"></i> Hacer Zoom
+  </button>
+
+  <button id="Marcatexto">
+    <i class="fa-solid fa-highlighter"></i> Resaltar
+  </button>
+</div>
+  </div>
+
+  <div class="info-container">
+    <div class="descripcion" id="descripcionJugador">
+      Estadio ejemplo con gran capacidad y diseño impresionante.
+    </div>
+
+    <div class="datos-jugador">
+      <img id="imgJugador" src="https://picsum.photos/id/1050/300/200" alt="Estadio">
+      <p><strong>Ciudad:</strong> Río de Janeiro</p>
+      <p><strong>Capacidad:</strong> 78,000</p>
+      <p><strong>Equipo:</strong> Selección Brasil</p>
+    </div>
+  </div>
+
+  <section class="videos-section">
+    <h2>Videos destacados</h2>
+    <div class="videos-container">
+      <button id="prevVideo" class="arrow"><i class="fa-solid fa-chevron-left"></i></button>
+      <div id="videoTitulo"></div>
+      <iframe id="videoFrame" allowfullscreen></iframe>
+      <button id="nextVideo" class="arrow"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+  </section>
+
+  <section class="comentarios">
+    <div class="comments-container" id="comentariosContainer">
+      <h3>Comentarios</h3>
+    </div>
+
+    <div class="otros-jugadores" id="otrosJugadoresContainer">
+      <h3>Otros Estadios</h3>
+    </div>
+  </section>
+</main>
+</div>
+
+<div class="menu-lateral" id="menuLateral">
+  <button onclick="location.href='Segundo avance_Ver historial.html'">Historial</button>
+  <button onclick="location.href='Segundo avance_Ver guardados.html'">Guardados</button>
+  <button onclick="location.href='Segundo avance_Ver me gustas.html'">Me gusta</button>
+</div>
+
+<div class="menu-derecha" id="menuPerfil">
+  <button onclick="location.href='Cuenta.html'">Cuenta</button>
+  <button onclick="location.href='Segundo avance_Usuario.html'">Ver mi foro</button>
+
+  <!-- Botones que se ocultarán si NO eres admin -->
+  <button id="btnSolicitudes" onclick="location.href='Segundo avance_Solicitudes.html'">Solicitudes</button>
+  <button id="btnBaneados" onclick="location.href='Segundo avance_Baneados.html'">Baneados</button>
+  <button id="btnDadasBaja" onclick="location.href='Segundo Avance_Publicaciones baneadas.html'">Dadas de baja</button>
+
+  <button id="toggleAspecto">Aspecto: Cla/Osc</button>
+  <button onclick="location.href='BrazukaR.html'">Salir</button>
+</div>
+
+
+<script>
+// ======== MENÚS ========
+const menuLateral = document.getElementById('menuLateral');
+const menuPerfil = document.getElementById('menuPerfil');
+const pageContent = document.getElementById('pageContent');
+const menuIcon = document.querySelector('.menu-icon');
+const profileIcon = document.querySelector('.profile-icon');
+
+menuIcon.onclick = e => { e.stopPropagation(); menuLateral.classList.toggle('abierto'); if(menuPerfil.classList.contains('abierto')) menuPerfil.classList.remove('abierto'); pageContent.style.transform = menuLateral.classList.contains('abierto') ? "translateX(180px)" : "translateX(0)"; };
+profileIcon.onclick = e => { e.stopPropagation(); menuPerfil.classList.toggle('abierto'); if(menuLateral.classList.contains('abierto')) menuLateral.classList.remove('abierto'); pageContent.style.transform = menuPerfil.classList.contains('abierto') ? "translateX(-180px)" : "translateX(0)"; };
+document.addEventListener('click', e => {
+  const clickEnMenuLateral = menuLateral.contains(e.target) || menuIcon.contains(e.target);
+  const clickEnMenuPerfil = menuPerfil.contains(e.target) || profileIcon.contains(e.target);
+
+  // Si el clic NO fue dentro del menú lateral ni su icono,cerrar menú lateral
+  if (!clickEnMenuLateral) menuLateral.classList.remove('abierto');
+
+  // Si el clic NO fue dentro del menú perfil ni su icono, cerrar menú perfil
+  if (!clickEnMenuPerfil) menuPerfil.classList.remove('abierto');
+
+  // Solo quitar el desplazamiento si ambos menús están cerrados
+  if (!menuLateral.classList.contains('abierto') && !menuPerfil.classList.contains('abierto')) {
+    pageContent.style.transform = "translateX(0)";
+  }
+});
+
+
+//  FOTO DE PERFIL SEGÚN EL ROL
+
+const rol = localStorage.getItem("rolUsuario");
+
+const fotoUsuario = document.getElementById("fotoUsuario");
+
+const fotos = {
+  admin: "https://static.vecteezy.com/system/resources/previews/014/541/527/original/administrator-system-icon-simple-style-vector.jpg",
+  usuario: "https://i0.wp.com/icon-library.com/images/user-icon-png-transparent/user-icon-png-transparent-17.jpg",
+  invitado: "https://static.vecteezy.com/system/resources/previews/008/302/462/large_2x/eps10-grey-user-icon-or-logo-in-simple-flat-trendy-modern-style-isolated-on-white-background-free-vector.jpg"
+};
+
+
+// --- ÍCONO DE LA ESQUINA ---
+if (rol === "admin") {
+  profileIcon.textContent = ""; 
+  profileIcon.style.backgroundImage = `url('${fotos.admin}')`;
+}
+else if (rol === "usuario") {
+  profileIcon.textContent = "";
+  profileIcon.style.backgroundImage = `url('${fotos.usuario}')`;
+}
+else if (rol === "invitado") {
+  profileIcon.textContent = "";
+  profileIcon.style.backgroundImage = `url('${fotos.invitado}')`;
+}
+
+profileIcon.style.backgroundSize = "cover";
+profileIcon.style.backgroundPosition = "center";
+
+// Ocultar botones según el rol
+if (rol !== "admin") {
+  document.getElementById("btnSolicitudes").style.display = "none";
+  document.getElementById("btnBaneados").style.display = "none";
+  document.getElementById("btnDadasBaja").style.display = "none";
+}
+
+// ======== DATOS DE ESTADIOS ========
+let estadiosData = {
+  "1": {
+    nombre: "Maracaná",
+    descripcion: "El Estadio Maracaná en Río de Janeiro es icónico y uno de los más grandes del mundo.",
+    img: "https://images.adsttc.com/media/images/5398/b4a1/c07a/8056/9e00/06be/newsletter/schlaich_bergermann_und_partner_Estadio_Maracana_1771_2880px.jpg?1402516621",
+    videos: [
+      { url: "https://www.youtube.com/embed/UYnEFBOITl0?si=oLqPoxbk_IKnB90o", titulo: "Tour por el Maracaná" },
+      { url: "https://www.youtube.com/embed/yE6NuaQsxRU?si=SZ0zPAJyi5b0bz3h", titulo: "Partido histórico" }
+    ]
+  },
+  "2": {
+    nombre: "Santiago Bernabéu",
+    descripcion: "El estadio del Real Madrid, ubicado en Madrid, España, con gran historia y diseño moderno.",
+    img: "https://images.adsttc.com/media/images/6526/e5c2/64e5/0c5f/47f3/0877/newsletter/l35-architects-sobre-la-remodelacion-del-estadio-santiago-bernabeu-de-madrid-a-pocos-meses-de-finalizar_16.jpg?1697048007",
+    videos: [
+      { url: "https://www.youtube.com/embed/KJ_TogHcTTM?si=3Yk98uWK3l66w6hT", titulo: "Tour Santiago Bernabéu" },
+      { url: "https://www.youtube.com/embed/sktuqsKUfmI?si=3IINZpxfrzYZ-SNH", titulo: "Mejor gol en casa" }
+    ]
+  },
+  "3": {
+    nombre: "Old Trafford",
+    descripcion: "Conocido como el Teatro de los Sueños, es la casa del Manchester United en Inglaterra.",
+    img: "https://tse2.mm.bing.net/th/id/OIP.cmC4XTXo5t3Wrg89QqTcBgHaE6?rs=1&pid=ImgDetMain&o=7&rm=3",
+    videos: [
+      { url: "https://www.youtube.com/embed/KUo-jEwQNmg?si=NAt4MZYTQAdZtFcp", titulo: "Recorrido Old Trafford" },
+      { url: "https://www.youtube.com/embed/2Jqk8jXXiZs?si=MGLGdwYdDHOKVcAd", titulo: "Partido legendario" }
+    ]
+  }
+};
+
+let urlParams = new URLSearchParams(window.location.search);
+let estadioId = urlParams.get("estadio") || localStorage.getItem("estadioId") || "1";
+let estadio = estadiosData[estadioId];
+
+// ======== ELEMENTOS ========
+const nombreJugador = document.getElementById("nombreJugador");
+const imgJugador = document.getElementById("imgJugador");
+const descripcionJugador = document.getElementById("descripcionJugador");
+const videoFrame = document.getElementById("videoFrame");
+const videoTitulo = document.getElementById("videoTitulo");
+const comentariosContainer = document.getElementById("comentariosContainer");
+const otrosJugadoresContainer = document.getElementById("otrosJugadoresContainer");
+let currentVideo = 0;
+
+function actualizarVideo() { videoFrame.src = estadio.videos[currentVideo].url; videoTitulo.textContent = estadio.videos[currentVideo].titulo; }
+
+// ======== COMENTARIOS ========
+let comentariosData = {
+  "1": ["Impresionante estadio! ⚽","Qué arquitectura! 😍","Gran ambiente en los partidos","Un clásico mundial"],
+  "2": ["Elegancia total ✨","Historia y gloria","Espectacular recorrido virtual","Me encantaría visitarlo"],
+  "3": ["El Teatro de los Sueños! 🌟","Mucha historia en cada rincón","Un estadio legendario","Partidos inolvidables"]
+};
+
+function cargarComentarios() {
+  comentariosContainer.innerHTML = "<h3>Comentarios</h3>";
+  const comentariosEstadio = comentariosData[estadioId] || [];
+  comentariosEstadio.forEach(texto => {
+    const div = document.createElement('div');
+    div.className = 'comment';
+    div.textContent = texto;
+    comentariosContainer.appendChild(div);
+  });
+}
+
+// ======== OTROS ESTADIOS ========
+function cargarOtrosJugadores() {
+  otrosJugadoresContainer.innerHTML = "<h3>Otros Estadios</h3>";
+  for (let eId in estadiosData) {
+    if(eId !== estadioId) {
+      const miniatura = document.createElement('div');
+      miniatura.className = "miniatura";
+
+      const img = document.createElement('img');
+      img.src = estadiosData[eId].img;
+      img.alt = estadiosData[eId].nombre;
+
+      const nombre = document.createElement('span');
+      nombre.textContent = estadiosData[eId].nombre;
+
+      miniatura.appendChild(img);
+      miniatura.appendChild(nombre);
+
+      miniatura.onclick = () => {
+        estadioId = eId;
+        estadio = estadiosData[estadioId];
+        nombreJugador.textContent = estadio.nombre;
+        imgJugador.src = estadio.img;
+        descripcionJugador.textContent = estadio.descripcion;
+        currentVideo = 0;
+        actualizarVideo();
+        cargarEstadoBotones();
+        cargarComentarios();
+        localStorage.setItem("estadioId", eId);
+        cargarOtrosJugadores();
+        const newUrl = window.location.pathname + "?estadio=" + estadioId;
+        window.history.replaceState(null,"",newUrl);
+        window.scrollTo({ top:0, behavior:"smooth" });
+      };
+
+      // ======== Actualizar historial al cambiar de estadio ========
+(function(){
+  const post = {
+    id: estadioId,
+    url: window.location.href,
+    thumbnail: estadio.img || 'https://via.placeholder.com/300x200',
+    titulo: estadio.nombre || 'Estadio',
+    autor: 'BRAZUK',
+    tipo: 'estadio',
+    timestamp: Date.now()
+  };
+
+  let historial = JSON.parse(localStorage.getItem('brazukHistorial') || '[]');
+  const index = historial.findIndex(p => p.id === post.id && p.tipo === 'estadio');
+  if(index >= 0){
+    historial[index] = {...historial[index], timestamp: Date.now()};
+    historial.unshift(historial.splice(index,1)[0]);
+  } else {
+    historial.unshift(post);
+  }
+  localStorage.setItem('brazukHistorial', JSON.stringify(historial));
+})();
+
+
+      if(eId === estadioId) miniatura.classList.add('active');
+      otrosJugadoresContainer.appendChild(miniatura);
+    }
+  }
+}
+
+// ======== LIKE & GUARDAR INDEPENDIENTES PARA ESTADIOS ========
+const likeBtn = document.getElementById('likeBtn');
+const saveBtn = document.getElementById('saveBtn');
+const HBtn= document.getElementById('TamanoTexto');
+const MarkBtn=document.getElementById('Marcatexto');
+function cargarEstadoBotones() {
+  // Se cambia la clave localStorage para que sea independiente de jugadores
+  likeBtn.classList.toggle('active', localStorage.getItem(`like_estadio_${estadioId}`) === "true");
+  saveBtn.classList.toggle('active', localStorage.getItem(`save_estadio_${estadioId}`) === "true");
+}
+
+// Al dar click, guardar de manera independiente
+likeBtn.onclick = () => {
+  likeBtn.classList.toggle("active");
+  const liked = likeBtn.classList.contains("active");
+
+  // Guardar o quitar el like en localStorage
+  localStorage.setItem(`like_estadio_${estadioId}`, liked);
+
+  if(liked){
+    // Guardar los datos completos del post para "Ver Me gusta"
+    const post = {
+      id: estadioId,
+      url: window.location.href,
+      thumbnail: imgJugador.src,        // miniatura del estadio
+      titulo: nombreJugador.textContent, // nombre del estadio
+      autor: 'BRAZUK',
+      tipo: 'estadio',
+      timestamp: Date.now()
+    };
+    localStorage.setItem(`post_estadio_${estadioId}`, JSON.stringify(post));
+  } else {
+    // Si se quita el like, se elimina del listado de "Me gusta"
+    localStorage.removeItem(`post_estadio_${estadioId}`);
+  }
+};
+
+
+saveBtn.onclick = () => {
+  saveBtn.classList.toggle("active");
+  const guardado = saveBtn.classList.contains("active");
+  localStorage.setItem(`save_estadio_${estadioId}`, guardado);
+
+  if(guardado){
+    // Guardar datos completos del estadio
+    const post = {
+      id: estadioId,
+      url: window.location.href,
+      thumbnail: imgJugador.src,
+      titulo: nombreJugador.textContent,
+      autor: 'BRAZUK',
+      tipo: 'estadio',
+      timestamp: Date.now()
+    };
+    localStorage.setItem(`post_estadio_${estadioId}`, JSON.stringify(post));
+  } else {
+    localStorage.removeItem(`post_estadio_${estadioId}`);
+  }
+};
+
+HBtn.onclick=()=>{
+  HBtn.classList.toggle("active");
+  const Text = document.getElementById('descripcionJugador');
+    if (HBtn.classList.contains("active")) {
+    Text.style.fontSize = "45px"; // zoom activado
+  } else {
+    Text.style.fontSize = "16px"; // tamaño normal
+  }
+
+};
+MarkBtn.onclick = () => {
+  MarkBtn.classList.toggle("active");
+  const Text = document.getElementById('descripcionJugador');
+
+  if (MarkBtn.classList.contains("active")) {
+    Text.innerHTML = `<mark>${Text.textContent}</mark>`;
+  } else {
+    Text.innerHTML = Text.textContent; // quitar el resaltado
+  }
+};
+// ======== VIDEOS ========
+document.getElementById('nextVideo').onclick = () => { currentVideo=(currentVideo+1)%estadio.videos.length; actualizarVideo(); };
+document.getElementById('prevVideo').onclick = () => { currentVideo=(currentVideo-1+estadio.videos.length)%estadio.videos.length; actualizarVideo(); };
+
+// ======== INICIALIZACIÓN ========
+function init() {
+  nombreJugador.textContent = estadio.nombre;
+  imgJugador.src = estadio.img;
+  descripcionJugador.textContent = estadio.descripcion;
+  actualizarVideo();
+  cargarEstadoBotones();
+  cargarComentarios();
+  cargarOtrosJugadores();
+}
+init();
+
+// ======== LOGO ========
+document.querySelector('.logo').onclick = () => { window.location.href = "Segundo avance_Pagina Principal.html"; };
+// ===== Modo claro/oscuro global para todas las páginas =====
+(function(){
+  const menuPerfil = document.getElementById('menuPerfil');
+  if(!menuPerfil) return;
+
+  const btnModo = menuPerfil.querySelector('button:nth-child(6)'); 
+
+  function aplicarModo(modo){
+    const body = document.body;
+    const pageContent = document.getElementById('pageContent');
+    const header = document.querySelector('header');
+    const logo = document.querySelector('.logo');
+
+    const titulosSeccion = document.querySelectorAll('.content-section h2');
+    const controles = document.querySelectorAll('.ver-mas, .ver-menos');
+    const titulosMiniaturas = document.querySelectorAll('.media-item span');
+    const nombreUsuarioSpan = document.getElementById('nombreUsuario');
+
+    if(modo==='oscuro'){
+      body.style.background='#000';
+      if(pageContent) pageContent.style.background='#111';
+      header.style.background='#000';
+      if(logo) logo.style.color='#fff';
+      nombreUsuarioSpan.style.color = '#fff'; 
+
+      titulosSeccion.forEach(h2=>h2.style.color='#000');
+      controles.forEach(btn=>btn.style.color='#000');
+      titulosMiniaturas.forEach(span=>span.style.color='#000');
+    } else {
+      body.style.background='#fff';
+      if(pageContent) pageContent.style.background='#fff';
+      header.style.background='#f4c52b';
+      if(logo) logo.style.color='#000';
+      nombreUsuarioSpan.style.color = '#000'; 
+
+      titulosSeccion.forEach(h2=>h2.style.color='#000');
+      controles.forEach(btn=>btn.style.color='#000');
+      titulosMiniaturas.forEach(span=>span.style.color='#000');
+    }
+  }
+
+  // Aplicar modo guardado al cargar la página
+  let modoGuardado = localStorage.getItem('modoBrazuk') || 'claro';
+  aplicarModo(modoGuardado);
+
+  // Cambiar modo al hacer clic en el botón
+  btnModo.addEventListener('click', ()=>{
+    modoGuardado = (modoGuardado==='claro')?'oscuro':'claro';
+    localStorage.setItem('modoBrazuk', modoGuardado);
+    aplicarModo(modoGuardado);
+  });
+})();
+
+// ====== Guardar automáticamente el estadio visitado ======
+(function(){
+  const estadioId = new URLSearchParams(window.location.search).get("estadio") || localStorage.getItem("estadioId") || "1";
+  const estadio = estadiosData[estadioId];
+  if(!estadio) return;
+
+  // Datos del "post" para historial
+  const post = {
+    id: estadioId,
+    url: window.location.href,
+    thumbnail: estadio.img || 'https://via.placeholder.com/300x200',
+    titulo: estadio.nombre || 'Estadio',
+    autor: 'BRAZUK', // Si quieres poner el autor real, se puede cambiar
+    tipo: 'estadio',
+    timestamp: Date.now()
+  };
+
+  // Cargar historial existente
+  let historial = JSON.parse(localStorage.getItem('brazukHistorial') || '[]');
+
+  // Si ya existe, actualizar timestamp y mover al inicio
+  const index = historial.findIndex(p => p.id === post.id && p.tipo === 'estadio');
+  if(index >= 0){
+    historial[index] = {...historial[index], timestamp: Date.now()};
+    historial.unshift(historial.splice(index,1)[0]);
+  } else {
+    // Nuevo post: agregar al inicio
+    historial.unshift(post);
+  }
+
+  // Guardar en localStorage
+  localStorage.setItem('brazukHistorial', JSON.stringify(historial));
+})();
+
+const nombre = localStorage.getItem("nombreUsuario") || "Invitado";
+document.getElementById("nombreUsuario").textContent = `${nombre}`;
+
+</script>
+
+<div id="avisoLogo" class="aviso-logo">
+  <span>Aqui puedes ver toda la informacion sobre un estadio, encuentra mas abajo</span>
+  <button class="cerrar-aviso">×</button>
+</div>
+<script>
+  document.querySelector(".cerrar-aviso").addEventListener("click", function () {
+    document.getElementById("avisoLogo").style.display = "none";
+  });
+</script>
+
+</body>
+</html>

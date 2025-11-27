@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRAZUK - Ver tu foro</title>
+<style>
+:root { --menu-width:180px; }
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
+body{background:#fff;color:#000;overflow-x:hidden;transition:background 0.3s,color 0.3s;}
+.page-content{transition: transform 0.32s ease; will-change: transform;}
+header{
+  background:#f4c52b;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 18px;
+  height:60px;
+  position:sticky;
+  top:0;
+  z-index:3;
+}
+header::after {
+  content:"";
+  display:block;
+  height:1px;
+  background:#fff;
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+}
+.left-header{display:flex;align-items:center;gap:10px;}
+.menu-icon{font-size:26px;cursor:pointer;user-select:none;}
+.logo{font-weight:700;font-size:20px;color:#000;text-decoration:none;cursor:pointer;}
+.profile-icon{
+  border:2px solid #000;
+  border-radius:50%;
+  padding:6px;       
+  cursor:pointer;
+  width:50px;       
+  height:50px;     
+  background-size: cover;
+  background-position: center;
+}
+
+
+/* Menús laterales */
+.menu-lateral, .menu-derecha{
+  position:fixed;top:0;height:100vh;
+  background:#f4c52b;
+  box-shadow:3px 0 14px rgba(0,0,0,0.15);
+  padding-top:80px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  z-index:4;
+  transition:transform 0.32s ease;
+  width:var(--menu-width);
+}
+.menu-lateral{left:0;transform:translateX(-100%);}
+.menu-lateral.abierto{transform:translateX(0);}
+.menu-derecha{right:0;transform:translateX(100%);}
+.menu-derecha.abierto{transform:translateX(0);}
+.menu-lateral button, .menu-derecha button{
+  width:80%;
+  background:#baf46a;
+  color:#000;
+  border:none;
+  border-radius:20px;
+  padding:10px 12px;
+  font-weight:600;
+  cursor:pointer;
+  text-align:center;
+}
+.menu-lateral button:hover, .menu-derecha button:hover{background:#a4e45a;}
+
+main {
+  width:90%;
+  margin:25px auto;
+  background:#baf46a;
+  border-radius:25px;
+  padding:30px;
+  position:relative;
+}
+h1{font-size:24px;margin-bottom:20px;color:#000;}
+h2{margin-bottom:1rem;font-size:1.2rem;color:#388e3c;}
+section{margin-bottom:2rem;}
+
+.foto-usuario {
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+  object-fit: cover;
+  background:#ddd;
+}
+
+.cargando {
+  width:100px;height:100px;
+  background-color:#c8e6c9;
+  border-radius:8px;
+  position:relative;
+}
+.cargando::after{
+  content:'';
+  position:absolute;
+  width:30px;
+  height:30px;
+  border:4px solid #999;
+  border-top-color:transparent;
+  border-radius:50%;
+  animation:girar 1s linear infinite;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+}
+
+.aviso-logo {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 0, 0.9);
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+  font-size: 14px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #000; 
+  font-weight: bold; 
+}
+
+.aviso-logo button.cerrar-aviso {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  color: #000; 
+}
+
+@keyframes girar {to{transform:translate(-50%,-50%) rotate(360deg);}}
+
+/* Posts */
+.post-list{display:flex;gap:1rem;}
+.post{
+  width:150px;
+  height:100px;
+  background-color:#a5d6a7;
+  border-radius:8px;
+  position:relative;
+}
+
+/* ===== Modo oscuro (manteniendo verdes y menús) ===== */
+body.oscuro{
+  background:#000;
+  color:#fff;
+}
+body.oscuro header{
+  background:#000;
+}
+body.oscuro .logo{color:#fff;}
+body.oscuro main{
+  background:#baf46a;
+  color:#000;
+}
+body.oscuro h1, body.oscuro h2{color:#000;}
+body.oscuro .menu-lateral,
+body.oscuro .menu-derecha{
+  background:#f4c52b;
+  color:#000;
+}
+body.oscuro .menu-lateral button,
+body.oscuro .menu-derecha button{
+  background:#baf46a;
+  color:#000;
+}
+body.oscuro .menu-lateral button:hover,
+body.oscuro .menu-derecha button:hover{
+  background:#a4e45a;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* espacio entre nombre y foto */
+  font-weight: 600;
+  font-size: 16px;
+  color: #000; /* color por defecto, cambiará con JS para modo oscuro */
+}
+
+
+
+</style>
+</head>
+<body>
+
+<!-- Menú lateral izquierdo (como en Cuenta) -->
+<div class="menu-lateral" id="menuLateral">
+  <button onclick="location.href='Segundo avance_Ver historial.html'">Historial</button>
+  <button onclick="location.href='Segundo avance_Ver guardados.html'">Guardados</button>
+  <button onclick="location.href='Segundo avance_Ver me gustas.html'">Me gusta</button>
+</div>
+
+<!-- Menú lateral derecho -->
+<div class="menu-derecha" id="menuPerfil">
+  <button onclick="location.href='Cuenta.html'">Cuenta</button>
+  <button onclick="location.href='Segundo avance_Usuario.html'">Ver mi foro</button>
+
+  <!-- Botones que se ocultarán si NO eres admin -->
+  <button id="btnSolicitudes" onclick="location.href='Segundo avance_Solicitudes.html'">Solicitudes</button>
+  <button id="btnBaneados" onclick="location.href='Segundo avance_Baneados.html'">Baneados</button>
+  <button id="btnDadasBaja" onclick="location.href='Segundo Avance_Publicaciones baneadas.html'">Dadas de baja</button>
+
+  <button id="toggleAspecto">Aspecto: Cla/Osc</button>
+  <button onclick="location.href='BrazukaR.html'">Salir</button>
+</div>
+
+
+<div class="page-content" id="pageContent">
+<header>
+  <div class="logo-container left-header">
+    <span class="menu-icon" id="menuBtn">☰</span>
+    <a href="Segundo avance_Pagina Principal.html" class="logo">BRAZUK</a>
+  </div>
+
+  <!-- Contenedor del nombre y perfil -->
+  <div class="user-info">
+    <span id="nombreUsuario"></span>
+    <div class="profile-icon" id="profileIcon">👤</div>
+  </div>
+</header>
+
+
+<main>
+   <h2><span id="nombreUsuario"></span></h2>
+
+  <h1>Ver tu foro</h1>
+  <section class="usuario">
+    <h2>Nombre de usuario</h2>
+    <img id="fotoUsuario" class="foto-usuario" src="" alt="Foto del usuario">
+  </section>
+
+  <section class="publicaciones">
+    <h2>Tus publicaciones</h2>
+    <div class="post-list">
+      <div class="post cargando"></div>
+      <div class="post cargando"></div>
+      <div class="post cargando"></div>
+    </div>
+  </section>
+</main>
+</div>
+
+<script>
+// === Menús laterales ===
+const pageContent = document.getElementById('pageContent');
+const menuIconBtn = document.getElementById('menuBtn');
+const menuLateral = document.getElementById('menuLateral');
+const profileIcon = document.getElementById('profileIcon');
+const menuPerfil = document.getElementById('menuPerfil');
+
+function cerrarMenus(){
+  menuLateral.classList.remove('abierto');
+  menuPerfil.classList.remove('abierto');
+  pageContent.style.transform = 'translateX(0)';
+}
+
+// Menú izquierdo
+menuIconBtn.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const abierto = menuLateral.classList.toggle('abierto');
+  menuPerfil.classList.remove('abierto');
+  pageContent.style.transform = abierto ? 
+    `translateX(${menuLateral.offsetWidth}px)` : 'translateX(0)';
+});
+
+// Menú derecho
+profileIcon.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const abierto = menuPerfil.classList.toggle('abierto');
+  menuLateral.classList.remove('abierto');
+  pageContent.style.transform = abierto ? 
+    `translateX(-${menuPerfil.offsetWidth}px)` : 'translateX(0)';
+});
+
+// Cerrar al hacer click fuera
+document.body.addEventListener('click',(e)=>{
+  if(!menuLateral.contains(e.target) &&
+     !menuIconBtn.contains(e.target) &&
+     !menuPerfil.contains(e.target) &&
+     !profileIcon.contains(e.target)){
+       cerrarMenus();
+  }
+});
+menuLateral.addEventListener('click', e=>e.stopPropagation());
+menuPerfil.addEventListener('click', e=>e.stopPropagation());
+
+
+// === Modo claro / oscuro ===
+const btnModo = document.getElementById('toggleAspecto');
+let modoOscuro = localStorage.getItem('modoBrazuk') === 'oscuro';
+const nombreUsuarioSpan = document.getElementById('nombreUsuario');
+
+function aplicarModo(activar){
+  modoOscuro = activar;
+  if(modoOscuro){
+    document.body.classList.add('oscuro');
+    localStorage.setItem('modoBrazuk','oscuro');
+    nombreUsuarioSpan.style.color = '#fff'; 
+  } else {
+    document.body.classList.remove('oscuro');
+    localStorage.setItem('modoBrazuk','claro');
+    nombreUsuarioSpan.style.color = '#000'; 
+  }
+}
+
+aplicarModo(modoOscuro);
+btnModo.addEventListener('click', ()=> aplicarModo(!modoOscuro));
+
+
+
+//FOTO DE PERFIL SEGÚN EL ROL
+
+const rol = localStorage.getItem("rolUsuario");
+
+const fotoUsuario = document.getElementById("fotoUsuario");
+
+const fotos = {
+  admin: "https://static.vecteezy.com/system/resources/previews/014/541/527/original/administrator-system-icon-simple-style-vector.jpg",
+  usuario: "https://i0.wp.com/icon-library.com/images/user-icon-png-transparent/user-icon-png-transparent-17.jpg",
+  invitado: "https://static.vecteezy.com/system/resources/previews/008/302/462/large_2x/eps10-grey-user-icon-or-logo-in-simple-flat-trendy-modern-style-isolated-on-white-background-free-vector.jpg"
+};
+
+// --- FOTO GRANDE DEL PERFIL ---
+if (rol === "admin") {
+  fotoUsuario.src = fotos.admin;
+}
+else if (rol === "usuario") {
+  fotoUsuario.src = fotos.usuario;
+}
+else if (rol === "invitado") {
+  fotoUsuario.src = fotos.invitado;
+}
+else {
+  fotoUsuario.src = ""; // por si no hay rol
+}
+
+// --- ÍCONO DE LA ESQUINA ---
+if (rol === "admin") {
+  profileIcon.textContent = ""; 
+  profileIcon.style.backgroundImage = `url('${fotos.admin}')`;
+}
+else if (rol === "usuario") {
+  profileIcon.textContent = "";
+  profileIcon.style.backgroundImage = `url('${fotos.usuario}')`;
+}
+else if (rol === "invitado") {
+  profileIcon.textContent = "";
+  profileIcon.style.backgroundImage = `url('${fotos.invitado}')`;
+}
+
+profileIcon.style.backgroundSize = "cover";
+profileIcon.style.backgroundPosition = "center";
+
+// Ocultar botones según el rol
+if (rol !== "admin") {
+  document.getElementById("btnSolicitudes").style.display = "none";
+  document.getElementById("btnBaneados").style.display = "none";
+  document.getElementById("btnDadasBaja").style.display = "none";
+}
+
+const nombre = localStorage.getItem("nombreUsuario") || "Invitado";
+document.getElementById("nombreUsuario").textContent = `${nombre}`;
+
+</script>
+
+<div id="avisoLogo" class="aviso-logo">
+  <span>Aqui puedes ver mejor tu foto de perfil y publicaciones</span>
+  <button class="cerrar-aviso">×</button>
+</div>
+<script>
+  document.querySelector(".cerrar-aviso").addEventListener("click", function () {
+    document.getElementById("avisoLogo").style.display = "none";
+  });
+</script>
+
+</body>
+</html>

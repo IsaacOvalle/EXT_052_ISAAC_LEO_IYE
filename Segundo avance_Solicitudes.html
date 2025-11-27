@@ -1,0 +1,247 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BRAZUK - Ver Solicitudes</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
+body{background:#fff;overflow-x:hidden;color:#000;}
+header{ background:#f4c52b;display:flex;align-items:center;justify-content:space-between; padding:0 20px;height:60px;border-bottom:2px solid #ccc;position:sticky;top:0;z-index:3; }
+.logo{display:flex;align-items:center;font-weight:bold;font-size:22px;cursor:pointer;line-height:1;padding-top:2px;}
+.menu-icon{font-size:22px;margin-right:10px;cursor:pointer;}
+.search-bar{display:flex;align-items:center;background:#dfffb2;border-radius:25px;padding:5px 15px;width:40%;}
+.search-bar input{border:none;outline:none;background:transparent;width:100%;padding:5px;font-size:16px;}
+.search-bar button{background:none;border:none;cursor:pointer;font-size:18px;}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  color: #000;
+}
+.profile-icon{
+  border:2px solid #000;
+  border-radius:50%;
+  cursor:pointer;
+  width:50px;
+  height:50px;
+  background-size: cover;
+  background-position: center;
+}
+
+/* Menús laterales */
+.menu-lateral, .menu-derecha{
+  position:fixed;top:0;height:100vh;background:#f4c52b; box-shadow:3px 0 14px rgba(0,0,0,0.15);padding-top:80px;display:flex;flex-direction:column;align-items:center;gap:12px; z-index:4;transition:transform 0.32s ease;min-width:180px;
+}
+.menu-lateral{left:0;transform:translateX(-100%);}
+.menu-lateral.abierto{transform:translateX(0);}
+.menu-derecha{right:0;transform:translateX(100%);}
+.menu-derecha.abierto{transform:translateX(0);}
+.menu-lateral button, .menu-derecha button{ width:80%;background:#baf46a;border:none;border-radius:20px;padding:10px 12px;font-weight:600;cursor:pointer; }
+.menu-lateral button:hover, .menu-derecha button:hover{background:#a4e45a;}
+
+#pageContent{transition:transform 0.32s ease;}
+main{width:90%;margin:20px auto;}
+h1{font-size:24px;margin-bottom:20px;color:#000;}
+.contenedor-solicitudes { display: flex; gap: 20px; flex-wrap: wrap; }
+.solicitud { background-color: #baf46a; border: 2px solid #ccc; border-radius: 8px; padding: 15px; margin-bottom: 20px; max-width: 400px; display: flex; flex-direction: column; }
+.solicitud img { width: 100%; height: auto; border-radius: 4px; }
+.solicitud.aprobada { border-color: green; opacity: 0.6; }
+.solicitud.rechazada { border-color: red; opacity: 0.6; }
+.botones { margin-top: 10px; }
+.botones button { font-size: 20px; margin-right: 10px; cursor: pointer; }
+@media (max-width: 767px){
+
+   header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    height: auto;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .search-bar {
+    order: 2;
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  .user-info {
+    order: 1;
+    /*flex-direction: column;
+    align-items: left;*/
+    gap: 6px;
+  }
+
+  main {
+    width: 95%;
+    padding: 10px;
+  }
+
+}
+</style>
+</head>
+<body>
+<div id="pageContent">
+  <header>
+    <div class="logo-container" style="display:flex;align-items:center;">
+      <span class="menu-icon" id="menuBtn">☰</span>
+      <span class="logo">BRAZUK</span>
+    </div>
+    <div class="search-bar">
+      <input type="text" placeholder="Buscar..." />
+      <button>🔍</button>
+    </div>
+    <!-- Contenedor del nombre y perfil -->
+    <div class="user-info">
+      <span id="nombreUsuarioHeader"></span>
+      <div class="profile-icon" id="profileIcon"></div>
+    </div>
+  </header>
+
+  <main>
+    <h1>Solicitudes</h1>
+    <div class="contenedor-solicitudes">
+      <div class="solicitud" id="solicitud1">
+        <img src="https://pbs.twimg.com/media/GeiGP2BWAAA8fJ2?format=jpg&name=large" alt="mundial 2030">
+        <h1><strong>Mundial 2030</strong></h1>
+        <p><strong>Esta propuesta conmemora el centenario del torneo...</strong></p>
+        <p><strong>Autor:</strong> Ana López</p>
+        <div class="botones">
+          <button onclick="aprobarSolicitud(1)">✅</button>
+          <button onclick="rechazarSolicitud(1)">❌</button>
+        </div>
+      </div>
+      <div class="solicitud" id="solicitud2">
+        <img src="https://phantom-marca-mx.unidadeditorial.es/e891f750699e16e52151061b88fe1a3a/resize/1320/f/webp/mx/assets/multimedia/imagenes/2023/10/31/16987755778539.png" alt="mundial 2034">
+        <h1><strong>Mundial 2034</strong></h1>
+        <p><strong>La FIFA adelantó los plazos de asignación...</strong></p>
+        <p><strong>Autor:</strong> Mz Triz</p>
+        <div class="botones">
+          <button onclick="aprobarSolicitud(2)">✅</button>
+          <button onclick="rechazarSolicitud(2)">❌</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Menús -->
+<div class="menu-lateral" id="menuLateral">
+  <button onclick="location.href='Segundo avance_Ver historial.html'">Historial</button>
+  <button onclick="location.href='Segundo avance_Ver guardados.html'">Guardados</button>
+  <button onclick="location.href='Segundo avance_Ver me gustas.html'">Me gusta</button>
+</div>
+
+<div class="menu-derecha" id="menuPerfil">
+  <button onclick="location.href='Cuenta.html'">Cuenta</button>
+  <button onclick="location.href='Segundo avance_Usuario.html'">Ver mi foro</button>
+  <button onclick="location.href='Segundo avance_Solicitudes.html'">Solicitudes</button>
+  <button onclick="location.href='Segundo avance_Baneados.html'">Baneados</button>
+  <button onclick="location.href='Segundo Avance_Publicaciones baneadas.html'">Dadas de baja</button>
+  <button id="toggleAspecto">Aspecto: Cla/Osc</button>
+  <button onclick="location.href='BrazukaR.html'">Salir</button>
+</div>
+
+<script>
+const menuLateral = document.getElementById('menuLateral');
+const menuPerfil = document.getElementById('menuPerfil');
+const pageContent = document.getElementById('pageContent');
+const menuBtn = document.getElementById('menuBtn');
+const profileIcon = document.getElementById('profileIcon');
+const nombreUsuarioHeader = document.getElementById('nombreUsuarioHeader');
+
+// FOTO PERFIL SEGÚN ROL
+const rol = localStorage.getItem("rolUsuario");
+const fotos = {
+  admin: "https://static.vecteezy.com/system/resources/previews/014/541/527/original/administrator-system-icon-simple-style-vector.jpg",
+  usuario: "https://i0.wp.com/icon-library.com/images/user-icon-png-transparent/user-icon-png-transparent-17.jpg",
+  invitado: "https://static.vecteezy.com/system/resources/previews/008/302/462/large_2x/eps10-grey-user-icon-or-logo-in-simple-flat-trendy-modern-style-isolated-on-white-background-free-vector.jpg"
+};
+if (rol === "admin") profileIcon.style.backgroundImage = `url('${fotos.admin}')`;
+else if (rol === "usuario") profileIcon.style.backgroundImage = `url('${fotos.usuario}')`;
+else profileIcon.style.backgroundImage = `url('${fotos.invitado}')`;
+profileIcon.style.backgroundSize = "cover";
+profileIcon.style.backgroundPosition = "center";
+
+// FUNCIONES DE SOLICITUDES
+function aprobarSolicitud(id){
+  const solicitud = document.getElementById(`solicitud${id}`);
+  if(!solicitud) return;
+  solicitud.classList.add('aprobada');
+  solicitud.querySelectorAll('button').forEach(btn => btn.disabled = true);
+}
+function rechazarSolicitud(id){
+  const solicitud = document.getElementById(`solicitud${id}`);
+  if(!solicitud) return;
+  solicitud.classList.add('rechazada');
+  solicitud.querySelectorAll('button').forEach(btn => btn.disabled = true);
+}
+
+// MENÚS LATERALES
+function cerrarMenus(){
+  menuLateral.classList.remove('abierto');
+  menuPerfil.classList.remove('abierto');
+  pageContent.style.transform = 'translateX(0)';
+}
+menuBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  const abierto = menuLateral.classList.toggle('abierto');
+  menuPerfil.classList.remove('abierto');
+  pageContent.style.transform = abierto ? `translateX(${menuLateral.offsetWidth}px)` : 'translateX(0)';
+});
+profileIcon.addEventListener('click', e=>{
+  e.stopPropagation();
+  const abierto = menuPerfil.classList.toggle('abierto');
+  menuLateral.classList.remove('abierto');
+  pageContent.style.transform = abierto ? `translateX(-${menuPerfil.offsetWidth}px)` : 'translateX(0)';
+});
+document.body.addEventListener('click', e=>{
+  if(!menuLateral.contains(e.target) && !menuBtn.contains(e.target) &&
+     !menuPerfil.contains(e.target) && !profileIcon.contains(e.target)){
+    cerrarMenus();
+  }
+});
+menuLateral.addEventListener('click', e=>e.stopPropagation());
+menuPerfil.addEventListener('click', e=>e.stopPropagation());
+
+// LOGO CLICABLE
+document.querySelector('.logo').addEventListener('click', ()=>location.href='Segundo avance_Pagina Principal.html');
+
+// MODO CLARO/OSCURO
+const btnModo = document.getElementById('toggleAspecto');
+let modoOscuro = localStorage.getItem('modoBrazuk') === 'oscuro';
+function aplicarModo(activar){
+  modoOscuro = activar;
+  if(modoOscuro){
+    document.body.style.background='#111';
+    document.body.style.color='#fff';
+    document.querySelector('header').style.background='#000';
+    pageContent.style.background='#111';
+    nombreUsuarioHeader.style.color = '#fff';
+    const h1 = document.querySelector('main h1'); if(h1) h1.style.color='#fff';
+    localStorage.setItem('modoBrazuk','oscuro');
+  } else {
+    document.body.style.background='#fff';
+    document.body.style.color='#000';
+    document.querySelector('header').style.background='#f4c52b';
+    pageContent.style.background='#fff';
+    nombreUsuarioHeader.style.color = '#000';
+    const h1 = document.querySelector('main h1'); if(h1) h1.style.color='#000';
+    localStorage.setItem('modoBrazuk','claro');
+  }
+}
+aplicarModo(modoOscuro);
+btnModo.addEventListener('click', ()=> aplicarModo(!modoOscuro));
+
+// MOSTRAR NOMBRE DE USUARIO
+const nombre = localStorage.getItem("nombreUsuario") || "Invitado";
+nombreUsuarioHeader.textContent = nombre;
+</script>
+</body>
+</html>

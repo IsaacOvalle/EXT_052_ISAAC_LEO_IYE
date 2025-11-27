@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRAZUK - Dadas de baja</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root{--menu-width:180px;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif;}
+body{background:#fff;color:#000;overflow-x:hidden;transition:background 0.3s,color 0.3s;}
+.page-content{transition: transform 0.32s ease; will-change: transform;}
+
+/* ===== HEADER ===== */
+header{
+  background:#f4c52b;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 18px;
+  height:60px;
+  position:sticky;
+  top:0;
+  z-index:3;
+}
+header::after {
+  content:"";
+  display:block;
+  height:1px;
+  background:#fff;
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+}
+.logo-container{display:flex;align-items:center;gap:10px;}
+.menu-icon{font-size:26px;cursor:pointer;user-select:none;}
+.logo{font-weight:700;font-size:20px;color:#000;text-decoration:none;cursor:pointer;}
+.profile-icon{
+  border:2px solid #000;
+  border-radius:50%;
+  padding:6px;
+  cursor:pointer;
+  width:50px;
+  height:50px;
+  background-size:cover;
+  background-position:center;
+}
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  color: #000;
+}
+
+/* ===== MENÚS ===== */
+.menu-lateral, .menu-derecha{
+  position:fixed;top:0;height:100vh;
+  background:#f4c52b;
+  box-shadow:3px 0 14px rgba(0,0,0,0.15);
+  padding-top:80px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  z-index:4;
+  transition:transform 0.32s ease;
+  width:var(--menu-width);
+}
+.menu-lateral{left:0;transform:translateX(-100%);}
+.menu-lateral.abierto{transform:translateX(0);}
+.menu-derecha{right:0;transform:translateX(100%);}
+.menu-derecha.abierto{transform:translateX(0);}
+.menu-lateral button, .menu-derecha button{
+  width:80%;
+  background:#baf46a;
+  color:#000;
+  border:none;
+  border-radius:20px;
+  padding:10px 12px;
+  font-weight:600;
+  cursor:pointer;
+  text-align:center;
+}
+.menu-lateral button:hover, .menu-derecha button:hover{background:#a4e45a;}
+
+/* ===== MAIN ===== */
+main {
+  width:90%;
+  margin:25px auto;
+  background:#baf46a;
+  border-radius:25px;
+  padding:30px;
+  position:relative;
+}
+h1{font-size:24px;margin-bottom:20px;color:#000;}
+
+/* ===== CONTENIDO DE BANEADOS ===== */
+.ban-section{
+  display:flex;
+  flex-direction: column;
+  gap: 30px;
+}
+.ban-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ban-form input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  font-size: 16px;
+}
+.ban-form button {
+  background-color: #f4c52b;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.lista-baneados h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+.lista-baneados ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.publicacion-item {
+  background: #dfffb2;
+  padding: 10px 15px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.publicacion-item .estado i {
+  font-size: 18px;
+  color: #555;
+}
+
+/* ===== MODO OSCURO ===== */
+body.oscuro{
+  background:#000;
+  color:#fff;
+}
+body.oscuro header{background:#000;}
+body.oscuro .logo{color:#fff;}
+body.oscuro main{
+  background:#baf46a;
+  color:#000;
+}
+body.oscuro h1,h2{color:#000;}
+body.oscuro .menu-lateral,
+body.oscuro .menu-derecha{
+  background:#f4c52b;
+  color:#000;
+}
+body.oscuro .menu-lateral button,
+body.oscuro .menu-derecha button{
+  background:#baf46a;
+  color:#000;
+}
+body.oscuro .menu-lateral button:hover,
+body.oscuro .menu-derecha button:hover{
+  background:#a4e45a;
+}
+</style>
+</head>
+<body>
+
+<!-- ===== MENÚ IZQUIERDO ===== -->
+<div class="menu-lateral" id="menuLateral">
+  <button onclick="location.href='Segundo avance_Ver historial.html'">Historial</button>
+  <button onclick="location.href='Segundo avance_Ver guardados.html'">Guardados</button>
+  <button onclick="location.href='Segundo avance_Ver me gustas.html'">Me gusta</button>
+</div>
+
+<!-- ===== MENÚ DERECHO ===== -->
+<div class="menu-derecha" id="menuPerfil">
+  <button onclick="location.href='Cuenta.html'">Cuenta</button>
+  <button onclick="location.href='Segundo avance_Usuario.html'">Ver mi foro</button>
+  <button onclick="location.href='Segundo avance_Solicitudes.html'">Solicitudes</button>
+  <button onclick="location.href='Segundo avance_Baneados.html'">Baneados</button>
+  <button onclick="location.href='Segundo Avance_Publicaciones baneadas.html'">Dadas de baja</button>
+  <button id="toggleAspecto">Aspecto: Cla/Osc</button>
+  <button onclick="location.href='BrazukaR.html'">Salir</button>
+</div>
+
+<!-- ===== CONTENIDO ===== -->
+<div class="page-content" id="pageContent">
+<header>
+  <div class="logo-container left-header">
+    <span class="menu-icon" id="menuBtn">☰</span>
+    <a href="Segundo avance_Pagina Principal.html" class="logo">BRAZUK</a>
+  </div>
+  <!-- Contenedor del nombre y perfil -->
+  <div class="user-info">
+    <span id="nombreUsuario"></span>
+    <div class="profile-icon" id="profileIcon"></div>
+  </div>
+</header>
+
+<main>
+  <h1>Bajas</h1>
+  <div class="ban-section">
+    <div class="ban-form">
+      <input type="text" id="PublicacionBanear" placeholder="Nombre">
+      <button onclick="banearUsuario()">Banear</button>
+    </div>
+    <div class="lista-baneados">
+      <h2>Lista de publicaciones dadas de baja</h2>
+      <ul id="listaPublicaciones">
+        <li class="publicacion-item">
+          <span class="nombre">Mundial 1930</span>
+          <span class="estado"><i class="fas fa-spinner fa-spin"></i></span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+const profileIcon = document.getElementById('profileIcon');
+const menuIconBtn = document.getElementById('menuBtn');
+const menuLateral = document.getElementById('menuLateral');
+const menuPerfil = document.getElementById('menuPerfil');
+const pageContent = document.getElementById('pageContent');
+const btnModo = document.getElementById('toggleAspecto');
+
+// FOTO DE PERFIL SEGÚN EL ROL
+const rol = localStorage.getItem("rolUsuario");
+const nombreUsuario = localStorage.getItem("nombreUsuario") || "Invitado";
+
+document.getElementById("nombreUsuario").textContent = nombreUsuario;
+
+const fotos = {
+  admin: "https://static.vecteezy.com/system/resources/previews/014/541/527/original/administrator-system-icon-simple-style-vector.jpg",
+  usuario: "https://i0.wp.com/icon-library.com/images/user-icon-png-transparent/user-icon-png-transparent-17.jpg",
+  invitado: "https://static.vecteezy.com/system/resources/previews/008/302/462/large_2x/eps10-grey-user-icon-or-logo-in-simple-flat-trendy-modern-style-isolated-on-white-background-free-vector.jpg"
+};
+
+if(rol === "admin") profileIcon.style.backgroundImage = `url('${fotos.admin}')`;
+else if(rol === "usuario") profileIcon.style.backgroundImage = `url('${fotos.usuario}')`;
+else profileIcon.style.backgroundImage = `url('${fotos.invitado}')`;
+
+profileIcon.style.backgroundSize = "cover";
+profileIcon.style.backgroundPosition = "center";
+
+// FUNCIONALIDAD DE BANEADOS
+function banearUsuario() {
+  const nombre = document.getElementById("PublicacionBanear").value.trim();
+  if (!nombre) return;
+
+  const lista = document.getElementById("listaPublicaciones");
+  const nuevoItem = document.createElement("li");
+  nuevoItem.className = "publicacion-item";
+  nuevoItem.innerHTML = `
+    <span class="nombre">${nombre}</span>
+    <span class="estado"><i class="fas fa-spinner fa-spin"></i></span>
+  `;
+  lista.appendChild(nuevoItem);
+  document.getElementById("PublicacionBanear").value = "";
+
+  setTimeout(() => {
+    const estado = nuevoItem.querySelector(".estado");
+    estado.innerHTML = `<i class="fas fa-check-circle" style="color:green;"></i>`;
+  }, 2000);
+}
+
+// MENÚS LATERALES
+function cerrarMenus(){
+  menuLateral.classList.remove('abierto');
+  menuPerfil.classList.remove('abierto');
+  pageContent.style.transform = 'translateX(0)';
+}
+
+menuIconBtn.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const abierto = menuLateral.classList.toggle('abierto');
+  menuPerfil.classList.remove('abierto');
+  pageContent.style.transform = abierto ? `translateX(${menuLateral.offsetWidth}px)` : 'translateX(0)';
+});
+
+profileIcon.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const abierto = menuPerfil.classList.toggle('abierto');
+  menuLateral.classList.remove('abierto');
+  pageContent.style.transform = abierto ? `translateX(-${menuPerfil.offsetWidth}px)` : 'translateX(0)';
+});
+
+document.body.addEventListener('click',(e)=>{
+  if(!menuLateral.contains(e.target) &&
+     !menuIconBtn.contains(e.target) &&
+     !menuPerfil.contains(e.target) &&
+     !profileIcon.contains(e.target)){
+       cerrarMenus();
+  }
+});
+
+menuLateral.addEventListener('click', e=>e.stopPropagation());
+menuPerfil.addEventListener('click', e=>e.stopPropagation());
+
+// MODO CLARO / OSCURO
+let modoOscuro = localStorage.getItem('modoBrazuk') === 'oscuro';
+function aplicarModo(activar){
+  modoOscuro = activar;
+  if(modoOscuro){
+    document.body.classList.add('oscuro');
+    btnModo.textContent = 'Aspecto: Osc';
+    localStorage.setItem('modoBrazuk','oscuro');
+    document.getElementById('nombreUsuario').style.color = '#fff';
+  } else {
+    document.body.classList.remove('oscuro');
+    btnModo.textContent = 'Aspecto: Cla';
+    localStorage.setItem('modoBrazuk','claro');
+    document.getElementById('nombreUsuario').style.color = '#000';
+  }
+}
+aplicarModo(modoOscuro);
+btnModo.addEventListener('click', ()=> aplicarModo(!modoOscuro));
+</script>
+
+</body>
+</html>

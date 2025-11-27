@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BRAZUK - Iniciar Sesión</title>
+<style>
+*{ box-sizing: border-box; margin:0; padding:0; font-family: Arial, sans-serif; }
+body{ background:#fff; color:#000; display:flex; flex-direction:column; min-height:100vh; }
+
+header{ background:#f4c52b; display:flex; align-items:center; padding:10px 18px; height:60px; border-bottom:1px solid #fff; }
+.logo{ font-weight:700; font-size:22px; color:#000; cursor:pointer; }
+
+main{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; text-align:center; }
+h2{ font-size:28px; margin-bottom:30px; font-weight:700; }
+
+.Sesion .Box{ background:transparent; width:100%; max-width:420px; padding:20px; display:flex; flex-direction:column; gap:16px; }
+
+label{ text-align:left; display:block; font-size:14px; margin-bottom:6px; font-weight:bold; }
+
+input[type="text"], input[type="email"], input[type="password"], select{
+  width:100%; padding:10px; border:1px solid #000; border-radius:3px; background:#baf46a; font-size:15px;
+}
+
+input[type="submit"], button{
+  width:100%; background:#000; color:#fff; border:none; padding:12px; font-weight:600; cursor:pointer; transition: background 0.2s;
+}
+input[type="submit"]:hover, button:hover{ background:#333; }
+
+.botonNegro{ margin-top:16px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="menu-icon">☰</span> BRAZUK</div>
+</header>
+
+<main>
+  <h2>Iniciar sesión</h2>
+
+  <div class="Sesion">
+    <div class="Box">
+
+      <form id="loginForm">
+        <label for="correo">Correo electrónico</label>
+        <input type="email" id="correo" name="correo" required>
+
+        <label for="clave">Clave</label>
+        <input type="password" id="clave" name="clave" required>
+
+        <input type="submit" class="botonNegro" value="Iniciar Sesión">
+      </form>
+
+      <button type="button" class="botonNegro" onclick="location.href='BrazukaR.html'">
+        Registrarse
+      </button>
+
+      <button type="button" class="botonNegro" id="continuarInvitado">
+        Continuar sin registrarse
+      </button>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  © 2025 BRAZUK - Todos los derechos reservados
+</footer>
+
+<script>
+window.addEventListener("DOMContentLoaded", function() {
+  const correoInput = document.getElementById("correo");
+
+  // Autocompletar correo si ya estaba guardado
+  const ultimoCorreo = localStorage.getItem("ultimoCorreo");
+  if (ultimoCorreo) correoInput.value = ultimoCorreo;
+});
+
+// Declarar administrador
+
+const adminCorreo = "admin@gmail.com";
+const adminClave = "admin123";
+const adminNombre = "Administrador";
+
+// Login
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const correo = document.getElementById("correo").value.trim();
+  const clave = document.getElementById("clave").value.trim();
+
+  //  VERIFICACIÓN DEL ADMIN
+  if (correo === adminCorreo && clave === adminClave) {
+    localStorage.setItem("nombreUsuario", adminNombre);
+    localStorage.setItem("ultimoCorreo", correo);
+    localStorage.setItem("rolUsuario", "admin");
+
+    location.href = "Segundo avance_Pagina Principal.html";
+    return; 
+  }
+
+  
+  // Usuarios normales (solo si NO es admin)
+ 
+  const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+  const usuario = usuarios.find(u => u.correo === correo);
+
+  if (!usuario) {
+    alert("Correo no registrado");
+    return;
+  }
+
+  if (usuario.clave !== clave) {
+    alert("Clave incorrecta");
+    return;
+  }
+
+  // Si el usuario NO tiene rol, se lo asignamos como "usuario"
+  if (!usuario.rol) {
+    usuario.rol = "usuario";
+  }
+
+  // Guardar datos en localStorage
+  localStorage.setItem("nombreUsuario", usuario.nombre);
+  localStorage.setItem("ultimoCorreo", correo);
+  localStorage.setItem("rolUsuario", usuario.rol);
+
+  // Ir a página principal
+  location.href = "Segundo avance_Pagina Principal.html";
+});
+
+// Continuar como invitado
+document.getElementById("continuarInvitado").addEventListener("click", function() {
+  localStorage.setItem("nombreUsuario", "Invitado");
+  localStorage.setItem("rolUsuario", "invitado");
+  location.href = "Segundo avance_Pagina Principal.html";
+});
+</script>
+
+
+
+
+</body>
+</html>
